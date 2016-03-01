@@ -27,7 +27,7 @@
 // FOSCSEL
 #pragma config FNOSC = FRC // Oscillator Select (Fast RC Oscillator (FRC))
 #pragma config SOSCSRC = ANA // SOSC Source Type (Analog Mode for use with crystal)
-#pragma config LPRCSEL = HP // LPRC Oscillator Power and Accuracy (High Power, High Accuracy Mode)
+#pragma config LPRCSEL = LP // LPRC Oscillator Power and Accuracy (High Power, High Accuracy Mode)
 #pragma config IESO = OFF // Internal External Switch Over bit (Internal External Switchover mode enabled (Two-speed Start-up enabled))
 // FOSC
 #pragma config POSCMOD = NONE // Primary Oscillator Configuration bits (Primary oscillator disabled)
@@ -48,7 +48,7 @@
 //#pragma config BORV = V20 // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (2.0V))
 #pragma config MCLRE = ON // MCLR Pin Enable bit (RA5 input pin disabled,MCLR pin enabled)
 // FICD
-#pragma config ICS = PGx1 // ICD Pin Placement Select bits (EMUC/EMUD share PGC1/PGD1)
+#pragma config ICS = PGx2 // ICD Pin Placement Select bits (EMUC/EMUD share PGC1/PGD1)
 // FDS
 #pragma config DSWDTPS = DSWDTPSF // Deep Sleep Watchdog Timer Postscale Select bits (1:2,147,483,648 (25.7 Days))
 #pragma config DSWDTOSC = LPRC // DSWDT Reference Clock Select bit (DSWDT uses Low Power RC Oscillator (LPRC))
@@ -73,8 +73,8 @@ void initialization(void) {
     ANSA = 0; // Make PORTA digital I/O
     TRISA = 0xFFFF; // Make PORTA all inputs
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
-    TRISB = 0xFFFF; // Sets all of port B to input
-
+    //TRISB = 0xFFFF; // Sets all of port B to input
+    TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
@@ -108,14 +108,14 @@ void initialization(void) {
 int readWaterSensor(void) // RB5 is one water sensor
 {
     // WPS_OUT - pin14
-    if (PORTBbits.RB5) {
-        while (PORTBbits.RB5) {
+    if (PORTBbits.RB8) {
+        while (PORTBbits.RB8) {
         }; //make sure you start at the beginning of the positive pulse
     }
-    while (!PORTBbits.RB5) {
+    while (!PORTBbits.RB8) {
     }; //wait for rising edge
     int prevICTime = TMR1; //get time at start of positive pulse
-    while (PORTBbits.RB5) {
+    while (PORTBbits.RB8) {
     };
     int currentICTime = TMR1; //get time at end of positive pulse
     long pulseWidth = 0;
@@ -209,19 +209,33 @@ void sendCommand(char command); // forward dec
 void sendData(char data); // forward dec
 
 void initLCD(void){
-     PORTBbits.RB1 = 0;       //LCD enable pin CTL3
-     delayMs(100);           //Wait >15 msec after power is applied
-     sendCommand(0x30);      //command 0x30 = Wake up
-     delayMs(30);            //must wait 5ms, busy flag not available
-     sendCommand(0x30);      //command 0x30 = Wake up #2
-     delayMs(10);            //must wait 160us, busy flag not available
-     sendCommand(0x30);      //command 0x30 = Wake up #3
-     delayMs(10);            //must wait 160us, busy flag not available
-     sendCommand(0x30);      //Function set: 8-bit/1-line
-     sendCommand(0x10);      //Set cursor
-     sendCommand(0x0c);      //Display ON; Cursor ON
-     sendCommand(0x06);      //Entry mode set
-
+     //PORTBbits.RB1 = 0;       //LCD enable pin CTL3
+//     delayMs(100);           //Wait >15 msec after power is applied
+//     sendCommand(0x30);      //command 0x30 = Wake up
+//     delayMs(30);            //must wait 5ms, busy flag not available
+//     sendCommand(0x30);      //command 0x30 = Wake up #2
+//     delayMs(10);            //must wait 160us, busy flag not available
+//     sendCommand(0x30);      //command 0x30 = Wake up #3
+//     delayMs(10);            //must wait 160us, busy flag not available
+//     sendCommand(0x30);
+//     sendCommand(0x30);      //Function set: 8-bit/1-line
+//     sendCommand(0x14);      //Set cursor
+//     sendCommand(0x0C);      //Display ON; Cursor ON
+//     sendCommand(0x06);      //Entry mode set
+//     sendCommand(0x01);
+//     sendCommand(0x02);      // Clear the display, set it to first line
+    delayMs(100);
+    sendCommand(0x00);
+    sendCommand(0x34);
+    sendCommand(0x10);
+    //sendCommand(0x08);
+    sendCommand(0x01);
+    delayMs(10);
+    sendCommand(0x06);
+    sendCommand(0x02);
+    delayMs(10);
+    sendCommand(0x0C);
+    delayMs(10);
 }
 
 void sendCommand(char command){
@@ -233,18 +247,27 @@ void sendCommand(char command){
 //    PORTBbits.RB2  = (command&0b00100000);  // DIS_B[5]
 //    PORTBbits.RB13  = (command&0b01000000); // DIS_B[6]
 //    PORTBbits.RB3  = (command&0b10000000);  // DIS_B[7]
-    PORTBbits.RB12 = (command & 0x01) >> 0;
-    PORTBbits.RB4  = (command & 0x02) >> 1;
-    PORTBbits.RB9  = (command & 0x04) >> 2;
-    PORTBbits.RB5  = (command & 0x08) >> 3;
-    PORTBbits.RB14 = (command & 0x10) >> 4;
-    PORTBbits.RB2  = (command & 0x20) >> 5;
-    PORTBbits.RB13 = (command & 0x40) >> 6;
-    PORTBbits.RB3  = (command & 0x80) >> 7;
+    //PORTBbits.RB12 = (data & 0x01) >> 0;
+    //PORTBbits.RB4  = (data & 0x02) >> 1;
+    //PORTBbits.RB9  = (data & 0x04) >> 2;
+    //PORTBbits.RB5  = (data & 0x08) >> 3;
+    //PORTBbits.RB14 = (data & 0x10) >> 4;
+    //PORTBbits.RB2  = (data & 0x20) >> 5;
+    //PORTBbits.RB13 = (data & 0x40) >> 6;
+    //PORTBbits.RB3  = (data & 0x80) >> 7;
+    PORTBbits.RB1  = 1;
+    PORTBbits.RB14 = (command & 0x01) >> 0;
+    PORTBbits.RB2  = (command & 0x02) >> 1;
+    PORTBbits.RB13 = (command & 0x04) >> 2;
+    PORTBbits.RB3  = (command & 0x08) >> 3;
+    PORTBbits.RB12 = (command & 0x10) >> 4;
+    PORTBbits.RB4  = (command & 0x20) >> 5;
+    PORTBbits.RB9  = (command & 0x40) >> 6;
+    PORTBbits.RB5  = (command & 0x80) >> 7;
 
-    PORTBbits.RB0 = 1;                 //high for command CTL1
+    PORTBbits.RB0 = 0;                 //low for command CTL1
 
-     PORTBbits.RB1 = 1;      // CTL3
+     //PORTBbits.RB1 = 1;      // CTL3
      delayMs(1);
      PORTBbits.RB1 = 0;     // CTL3
 }
@@ -258,17 +281,26 @@ void sendData(char data){
 //    PORTBbits.RB13  = (data & 0b01000000);    // DIS_B[6]
 //    PORTBbits.RB3  = (data & 0b10000000);     // DIS_B[7]
     
-    PORTBbits.RB12 = (data & 0x01) >> 0;
-    PORTBbits.RB4  = (data & 0x02) >> 1;
-    PORTBbits.RB9  = (data & 0x04) >> 2;
-    PORTBbits.RB5  = (data & 0x08) >> 3;
-    PORTBbits.RB14 = (data & 0x10) >> 4;
-    PORTBbits.RB2  = (data & 0x20) >> 5;
-    PORTBbits.RB13 = (data & 0x40) >> 6;
-    PORTBbits.RB3  = (data & 0x80) >> 7;
-    PORTBbits.RB0 = 0; //low for data CTL1
+    //PORTBbits.RB12 = (data & 0x01) >> 0;
+    //PORTBbits.RB4  = (data & 0x02) >> 1;
+    //PORTBbits.RB9  = (data & 0x04) >> 2;
+    //PORTBbits.RB5  = (data & 0x08) >> 3;
+    //PORTBbits.RB14 = (data & 0x10) >> 4;
+    //PORTBbits.RB2  = (data & 0x20) >> 5;
+    //PORTBbits.RB13 = (data & 0x40) >> 6;
+    //PORTBbits.RB3  = (data & 0x80) >> 7;
+    PORTBbits.RB1 = 1;
+    PORTBbits.RB14 = (data & 0x01) >> 0;
+    PORTBbits.RB2  = (data & 0x02) >> 1;
+    PORTBbits.RB13 = (data & 0x04) >> 2;
+    PORTBbits.RB3  = (data & 0x08) >> 3;
+    PORTBbits.RB12 = (data & 0x10) >> 4;
+    PORTBbits.RB4  = (data & 0x20) >> 5;
+    PORTBbits.RB9  = (data & 0x40) >> 6;
+    PORTBbits.RB5  = (data & 0x80) >> 7;
+    PORTBbits.RB0 = 0; //high for data CTL1
 
-    PORTBbits.RB1 = 1;  // CTL3
+    //PORTBbits.RB1 = 1;  // CTL3
     delayMs(1); //Clocks on falling edge of enable
     PORTBbits.RB1 = 0;  // CTL3
 }
@@ -339,7 +371,7 @@ int main (void){
 
      initLCD();
     // There's a chance that our numbers aren't ASCII
-    sendData(0x48);   //H
+    sendData('h');   //H
 //            sendData(0x65);   //E
 //            sendData(0x6C);   //L
 //            sendData(0x6C);   //L
