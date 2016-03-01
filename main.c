@@ -264,7 +264,7 @@ uint16_t mapPort(uint8_t val, uint16_t curPort)
         //  n is the current port val we are looking at
         //  x is (val & (position of digit we are on in val) >> number of iterations
         //  Yields this function as a loop.
-        curPort ^= (-((val & digit) >> i) ^ curPort ) & (1 << ports[0]);
+        curPort ^= (-((val & digit) >> i) ^ curPort ) & (1 << ports[i]);
         digit = digit << 1;
     }
     
