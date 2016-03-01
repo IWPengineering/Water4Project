@@ -268,6 +268,8 @@ uint16_t mapPort(uint8_t val, uint16_t curPort)
         digit = digit << 1;
     }
     
+    return curPort;
+    
 }
 
 void sendCommand(char command){
