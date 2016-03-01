@@ -332,7 +332,7 @@ void sendData(char data){
     PORTBbits.RB4  = (data & 0x20) >> 5;
     PORTBbits.RB9  = (data & 0x40) >> 6;
     PORTBbits.RB5  = (data & 0x80) >> 7;
-    PORTBbits.RB0 = 0; //high for data CTL1
+    PORTBbits.RB0 = 1; //high for data CTL1
 
     //PORTBbits.RB1 = 1;  // CTL3
     delayMs(1); //Clocks on falling edge of enable
