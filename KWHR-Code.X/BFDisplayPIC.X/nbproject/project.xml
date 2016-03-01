@@ -3,12 +3,13 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>KWHR-Code</name>
-            <creation-uuid>4460730f-dbfa-4399-8daa-ecab70fd6805</creation-uuid>
+            <name>BFDisplayPIC</name>
+            <creation-uuid>e5d5d055-b16c-4d58-93fe-ca2cca1a7a19</creation-uuid>
             <make-project-type>0</make-project-type>
-            <c-extensions/>
+            <c-extensions>c</c-extensions>
             <cpp-extensions/>
-            <header-extensions/>
+            <header-extensions>h</header-extensions>
+            <asminc-extensions/>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
             <make-dep-projects/>
         </data>
