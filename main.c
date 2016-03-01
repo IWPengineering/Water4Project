@@ -253,7 +253,7 @@ DSP4_PORT, DSP5_PORT, DSP6_PORT, DSP7_PORT};
 uint16_t mapPort(uint8_t val, uint16_t curPort)
 {
     // val[n] -> curPort[DSPn_PORT]
-    uint8_t digit = 0;
+    uint8_t digit = 1;
     uint8_t i;
     for(i = 0; i < 8; i++)
     {
