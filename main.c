@@ -238,6 +238,38 @@ void initLCD(void){
     delayMs(10);
 }
 
+// Maps a command onto port b, using the definitions
+#define DSP0_PORT           14
+#define DSP1_PORT           2
+#define DSP2_PORT           13
+#define DSP3_PORT           3
+#define DSP4_PORT           12
+#define DSP5_PORT           4
+#define DSP6_PORT           9
+#define DSP7_PORT           5
+uint8_t ports[] = {DSP0_PORT, DSP1_PORT, DSP2_PORT, DSP3_PORT, 
+DSP4_PORT, DSP5_PORT, DSP6_PORT, DSP7_PORT};
+// Will preserve current port, except defines
+uint16_t mapPort(uint8_t val, uint16_t curPort)
+{
+    // val[n] -> curPort[DSPn_PORT]
+    uint8_t digit = 0;
+    uint8_t i;
+    for(i = 0; i < 8; i++)
+    {
+        // Logic:
+        //  Set the n'th bit of 'number' to x:
+        //  number ^= (-x ^ number) & (1 << n);
+        //  number is curPort
+        //  n is the current port val we are looking at
+        //  x is (val & (position of digit we are on in val) >> number of iterations
+        //  Yields this function as a loop.
+        curPort ^= (-((val & digit) >> i) ^ curPort ) & (1 << ports[0]);
+        digit = digit << 1;
+    }
+    
+}
+
 void sendCommand(char command){
 //    PORTBbits.RB12  = (command&0b00000001); // DIS_B[0]
 //    PORTBbits.RB4  = (command&0b00000010); //  DIS_B[1]
