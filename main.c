@@ -15,6 +15,8 @@
 
 
 
+
+
 // ****************************************************************************
 // *** PIC24F32KA302 Configuration Bit Settings *******************************
 // ****************************************************************************
@@ -58,7 +60,103 @@
 const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
 
+
+
+
+
+/**********************/
+/**********************/
+/**********************/
+/**********************/
+/**********************/
+/***************************************/
+/****  DISPLAY SPECIFIC  ******/
+#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  LATBbits.LATB0 // LATAbits.LATA6
+#define DISPLAY_BIT_SELECT_DIR__READ_WRITE LATBbits.LATB15
+#define DISPLAY_BIT_ENABLE__HIGH_LO LATBbits.LATB1 // LATAbits.LATA4
+//#define DISPLAY_BIT_BUSY_FLAG PORTBbits.RB7
+
+#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR TRISBbits.TRISB0 // TRISAbits.TRISA6 // LATAbits.LATA6
+#define DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR TRISBbits.TRISB15 // LATAbits.LATA7
+#define DISPLAY_BIT_ENABLE__HIGH_LO_DIR TRISBbits.TRISB1 // TRISAbits.TRISA4 // LATAbits.LATA4
+
+
+//#define DISPLAY_DATA_WRITE LATB
+//#define DISPLAY_DATA_DIR_SET TRISB
+//#define DISPLAY_DATA_DIR_BUSY_FLAG TRISBbits.TRISB7
+
+//#define DISPLAY_LOOP_COUNT 5
+
+#define DISPLAY_COMMAND_FUNCTION_SET 0b00111001
+#define DISPLAY_COMMAND_OFF 0b00001000
+#define DISPLAY_COMMAND_CLEAR 0b00000001
+#define DISPLAY_COMMAND_ENTRY 0b00000110
+#define DISPLAY_COMMAND_HOME 0b00000010
+#define DISPLAY_COMMAND_ON 0b00001100
+
+typedef enum _DisplayCommand {
+    sendCommand = 1,
+    sendData = 2,
+    setPosition = 3
+};
+
+struct _DisplayData {
+    enum _DisplayCommand command;
+    unsigned char data;
+};
+
+
+void dspDisplayInit(void);
+void dspDisplayReset(void);
+void dspDisplaySend(enum _DisplayCommand, unsigned char);
+void dspDisplayDataAddOne(enum _DisplayCommand, unsigned char);
+void dspDisplayDataSetRow(unsigned char);
+void dspDisplayDataAddString(unsigned char *);
+void dspDisplayDataAddInteger(int);
+void dspDisplayLoop(int);
+
+
+#define DISPLAY_DATA_POSITION_MAX 75
+struct _DisplayData DisplayData[DISPLAY_DATA_POSITION_MAX];
+unsigned char DisplayDataPositionRead = 0;
+unsigned char DisplayDataPositionWrite = 0;
+unsigned char DisplayDataPositionInverse;
+
+/***********************************************
+ END DISPLAY SPECIFIC
+ *******************************************/
+
+void DisplayInit(void);
+void DisplayLoop(int);
+void DisplayDataAddString(unsigned char *);
+void DisplayDataAddInteger(int);
+void DisplayDataSetRow(unsigned char);
+void DisplayValues(unsigned char, unsigned long, unsigned long, int, int);
+void HeartBeat(void);
+
+
+
+#define DSP0_PORT           LATBbits.LATB12
+#define DSP1_PORT           LATBbits.LATB11
+#define DSP2_PORT           LATBbits.LATB9
+#define DSP3_PORT           LATBbits.LATB5
+#define DSP4_PORT           LATBbits.LATB14
+#define DSP5_PORT           LATBbits.LATB2
+#define DSP6_PORT           LATBbits.LATB13
+#define DSP7_PORT           LATBbits.LATB3
+
+#define DSP0_PORT_DIR       TRISBbits.TRISB12 //  LATBbits.RB14
+#define DSP1_PORT_DIR       TRISBbits.TRISB11 //    LATBbits.RB2
+#define DSP2_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB13
+#define DSP3_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB3
+#define DSP4_PORT_DIR       TRISBbits.TRISB14 //    LATBbits.RB12
+#define DSP5_PORT_DIR       TRISBbits.TRISB2 //   LATBbits.RB4
+#define DSP6_PORT_DIR       TRISBbits.TRISB13 //    LATBbits.RB9
+#define DSP7_PORT_DIR       TRISBbits.TRISB3 //    LATBbits.RB5
+
+
 void initAdc(void); // forward declaration of init adc
+
 /*********************************************************************
  * Function: initialization()
  * Input: None
@@ -75,6 +173,9 @@ void initialization(void) {
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
     //TRISB = 0xFFFF; // Sets all of port B to input
     TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
+    
+    
+   
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
@@ -90,7 +191,7 @@ void initialization(void) {
     // WPS_ON/OFF pin 2
     TRISAbits.TRISA0 = 0; //makes water presence sensor pin an output.
     PORTAbits.RA0 = 1; //turns on the water presnece sensor.
-    
+
     CNEN2bits.CN24IE = 1; // enable interrupt for pin 15
     IEC1bits.CNIE = 1; // enable change notification interrupt
 
@@ -186,6 +287,7 @@ int readAdc(int channel) //check with accelerometer
     }
     return ADC1BUF0;
 }
+
 /*********************************************************************
  * Function: delayMs()
  * Input: milliseconds
@@ -205,189 +307,46 @@ void delayMs(int ms) {
     }
 }
 
-void sendCommand(char command); // forward dec
-void sendData(char data); // forward dec
+void __attribute__((__interrupt__, __auto_psv__)) _DefaultInterrupt() { //Tested 06-05-2014
 
-void initLCD(void){
-     //PORTBbits.RB1 = 0;       //LCD enable pin CTL3
-//     delayMs(100);           //Wait >15 msec after power is applied
-//     sendCommand(0x30);      //command 0x30 = Wake up
-//     delayMs(30);            //must wait 5ms, busy flag not available
-//     sendCommand(0x30);      //command 0x30 = Wake up #2
-//     delayMs(10);            //must wait 160us, busy flag not available
-//     sendCommand(0x30);      //command 0x30 = Wake up #3
-//     delayMs(10);            //must wait 160us, busy flag not available
-//     sendCommand(0x30);
-//     sendCommand(0x30);      //Function set: 8-bit/1-line
-//     sendCommand(0x14);      //Set cursor
-//     sendCommand(0x0C);      //Display ON; Cursor ON
-//     sendCommand(0x06);      //Entry mode set
-//     sendCommand(0x01);
-//     sendCommand(0x02);      // Clear the display, set it to first line
-    delayMs(100);
-    sendCommand(0x00);
-    sendCommand(0x34);
-    sendCommand(0x10);
-    //sendCommand(0x08);
-    sendCommand(0x01);
-    delayMs(10);
-    sendCommand(0x06);
-    sendCommand(0x02);
-    delayMs(10);
-    sendCommand(0x0C);
-    delayMs(10);
 }
 
-// Maps a command onto port b, using the definitions
-#define DSP0_PORT           14
-#define DSP1_PORT           2
-#define DSP2_PORT           13
-#define DSP3_PORT           3
-#define DSP4_PORT           12
-#define DSP5_PORT           4
-#define DSP6_PORT           9
-#define DSP7_PORT           5
-uint8_t ports[] = {DSP0_PORT, DSP1_PORT, DSP2_PORT, DSP3_PORT, 
-DSP4_PORT, DSP5_PORT, DSP6_PORT, DSP7_PORT};
-// Will preserve current port, except defines
-uint16_t mapPort(uint8_t val, uint16_t curPort)
-{
-    // val[n] -> curPort[DSPn_PORT]
-    uint8_t digit = 1;
-    uint8_t i;
-    for(i = 0; i < 8; i++)
-    {
-        // Logic:
-        //  Set the n'th bit of 'number' to x:
-        //  number ^= (-x ^ number) & (1 << n);
-        //  number is curPort
-        //  n is the current port val we are looking at
-        //  x is (val & (position of digit we are on in val) >> number of iterations
-        //  Yields this function as a loop.
-        curPort ^= (-((val & digit) >> i) ^ curPort ) & (1 << ports[i]);
-        digit = digit << 1;
+void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) {
+    if (IFS1bits.CNIF && PORTBbits.RB6) { // if button pushed it goes high
+
+        buttonFlag = 1; // I have entered the ISR
+
+        IFS1bits.CNIF = 0;
     }
-    
-    return curPort;
-    
-}
-
-void sendCommand(char command){
-//    PORTBbits.RB12  = (command&0b00000001); // DIS_B[0]
-//    PORTBbits.RB4  = (command&0b00000010); //  DIS_B[1]
-//    PORTBbits.RB9  = (command&0b00000100);  // DIS_B[2]
-//    PORTBbits.RB5  = (command&0b00001000);  // DIS_B[3]
-//    PORTBbits.RB14  = (command&0b00010000); // DIS_B[4]
-//    PORTBbits.RB2  = (command&0b00100000);  // DIS_B[5]
-//    PORTBbits.RB13  = (command&0b01000000); // DIS_B[6]
-//    PORTBbits.RB3  = (command&0b10000000);  // DIS_B[7]
-    //PORTBbits.RB12 = (data & 0x01) >> 0;
-    //PORTBbits.RB4  = (data & 0x02) >> 1;
-    //PORTBbits.RB9  = (data & 0x04) >> 2;
-    //PORTBbits.RB5  = (data & 0x08) >> 3;
-    //PORTBbits.RB14 = (data & 0x10) >> 4;
-    //PORTBbits.RB2  = (data & 0x20) >> 5;
-    //PORTBbits.RB13 = (data & 0x40) >> 6;
-    //PORTBbits.RB3  = (data & 0x80) >> 7;
-    PORTBbits.RB1  = 1;
-    PORTBbits.RB14 = (command & 0x01) >> 0;
-    PORTBbits.RB2  = (command & 0x02) >> 1;
-    PORTBbits.RB13 = (command & 0x04) >> 2;
-    PORTBbits.RB3  = (command & 0x08) >> 3;
-    PORTBbits.RB12 = (command & 0x10) >> 4;
-    PORTBbits.RB4  = (command & 0x20) >> 5;
-    PORTBbits.RB9  = (command & 0x40) >> 6;
-    PORTBbits.RB5  = (command & 0x80) >> 7;
-
-    PORTBbits.RB0 = 0;                 //low for command CTL1
-
-     //PORTBbits.RB1 = 1;      // CTL3
-     delayMs(1);
-     PORTBbits.RB1 = 0;     // CTL3
-}
-void sendData(char data){
-//    PORTBbits.RB12  = (data & 0b00000001);    // DIS_B[0]
-//    PORTBbits.RB4  = (data & 0b00000010);     // DIS_B[1]
-//    PORTBbits.RB9  = (data & 0b00000100);     // DIS_B[2]
-//    PORTBbits.RB5  = (data & 0b00001000);     // DIS_B[3]
-//    PORTBbits.RB14  = (data & 0b00010000);    // DIS_B[4]
-//    PORTBbits.RB2  = (data & 0b00100000);     // DIS_B[5]
-//    PORTBbits.RB13  = (data & 0b01000000);    // DIS_B[6]
-//    PORTBbits.RB3  = (data & 0b10000000);     // DIS_B[7]
-    
-    //PORTBbits.RB12 = (data & 0x01) >> 0;
-    //PORTBbits.RB4  = (data & 0x02) >> 1;
-    //PORTBbits.RB9  = (data & 0x04) >> 2;
-    //PORTBbits.RB5  = (data & 0x08) >> 3;
-    //PORTBbits.RB14 = (data & 0x10) >> 4;
-    //PORTBbits.RB2  = (data & 0x20) >> 5;
-    //PORTBbits.RB13 = (data & 0x40) >> 6;
-    //PORTBbits.RB3  = (data & 0x80) >> 7;
-    PORTBbits.RB1 = 1;
-    PORTBbits.RB14 = (data & 0x01) >> 0;
-    PORTBbits.RB2  = (data & 0x02) >> 1;
-    PORTBbits.RB13 = (data & 0x04) >> 2;
-    PORTBbits.RB3  = (data & 0x08) >> 3;
-    PORTBbits.RB12 = (data & 0x10) >> 4;
-    PORTBbits.RB4  = (data & 0x20) >> 5;
-    PORTBbits.RB9  = (data & 0x40) >> 6;
-    PORTBbits.RB5  = (data & 0x80) >> 7;
-    PORTBbits.RB0 = 1; //high for data CTL1
-
-    //PORTBbits.RB1 = 1;  // CTL3
-    delayMs(1); //Clocks on falling edge of enable
-    PORTBbits.RB1 = 0;  // CTL3
-}
-void __attribute__((__interrupt__,__auto_psv__)) _DefaultInterrupt()
-{ //Tested 06-05-2014
 
 }
- void __attribute__ (( interrupt, auto_psv )) _CNInterrupt(void) 
- {
-     if(IFS1bits.CNIF && PORTBbits.RB6)
-     {  // if button pushed it goes high
 
-       buttonFlag = 1;  // I have entered the ISR
-
-       IFS1bits.CNIF = 0;
-     }
-
-}
- 
-void hoursToAsciiDisplay(int hours){
-    initLCD();
+void hoursToAsciiDisplay(int hours) {
     int startLcdView = 0;
-    if (hours == 0)
-    {
-        sendData(48); // send 0 as the number of hours
-    }
-    else
-    {
-        if(startLcdView || hours / 10000 != 0)
-        {
-            sendData(hours / 10000 + 48);
+    if (hours == 0) {
+        //        sendData(48); // send 0 as the number of hours
+    } else {
+        if (startLcdView || hours / 10000 != 0) {
+            //          sendData(hours / 10000 + 48);
             startLcdView = 1;
         }
         hours /= 10;
-        if(startLcdView || hours / 1000 != 0)
-        {
-            sendData(hours / 1000 + 48);
+        if (startLcdView || hours / 1000 != 0) {
+            //        sendData(hours / 1000 + 48);
             startLcdView = 1;
         }
         hours /= 10;
-        if(startLcdView || hours / 100 != 0)
-        {
-            sendData(hours / 100 + 48);
+        if (startLcdView || hours / 100 != 0) {
+            //      sendData(hours / 100 + 48);
             startLcdView = 1;
         }
         hours /= 10;
-        if(startLcdView || hours / 10 != 0)
-        {
-            sendData(hours / 10 + 48);
+        if (startLcdView || hours / 10 != 0) {
+            //    sendData(hours / 10 + 48);
             startLcdView = 1;
         }
         hours /= 10;
-        sendData(hours + 48);
+        //sendData(hours + 48);
     }
 }
 
@@ -397,39 +356,47 @@ void hoursToAsciiDisplay(int hours){
 #define delayTime       500
 #define msHr            (uint32_t)3600000
 #define hourTicks       msHr / delayTime
-int main (void){
+
+int main(void) {
     initialization();
+
+    DisplayInit();
+        DisplayDataSetRow(0);
+        DisplayDataAddString("");
+        DisplayLoop(10);
+        DisplayLoop(10);
+        DisplayLoop(10);
+        DisplayLoop(10);
+    
     int counter = 0;
     int hourCounter = 0;
-    PORTBbits.RB15 = 0;  //R/W always low for write CTL2
+    //    PORTBbits.RB15 = 0; //R/W always low for write CTL2
 
-     initLCD();
     // There's a chance that our numbers aren't ASCII
-    sendData('h');   //H
-//            sendData(0x65);   //E
-//            sendData(0x6C);   //L
-//            sendData(0x6C);   //L
-//            sendData(0x6F);   //0
+    //sendData('h');   //H
+    //            sendData(0x65);   //E
+    //            sendData(0x6C);   //L
+    //            sendData(0x6C);   //L
+    //            sendData(0x6F);   //0
 
 
 
-    while(1)
-    {        
+    while (1) {
+        HeartBeat();
+        DisplayLoop(10);
+        
         delayMs(delayTime);
-            // is there water?
-        if(readWaterSensor())
-        {
+        // is there water?
+        if (readWaterSensor()) {
             counter++; // increments every half a second
 
-            if (counter >= hourTicks)
-            { // 7200 counter has reached 1 hour's worth
+            if (counter >= hourTicks) { // 7200 counter has reached 1 hour's worth
                 hourCounter++;
-                counter = 0; 
+                counter = 0;
             }
         }
-        
-        if(buttonFlag)
-        {
+
+        if (buttonFlag) {
             buttonFlag = 0;
             hoursToAsciiDisplay(hourCounter);
             delayMs(5000);
@@ -438,4 +405,313 @@ int main (void){
 
     return -1;
 }
+
+/*********************************
+ DISPLAY FUNCTIONS
+ * first functions only call the internal functions if we are using them
+ * second set are entirely excluded if we are not using display features
+ * this should help turn on and off the display without much trouble
+ *********************************/
+void DisplayInit(void) {
+    dspDisplayInit();
+    return;
+}
+
+void DisplayLoop(int count) {
+    for (int inx = 0; inx < count; inx++) {
+        dspDisplayLoop(1);
+    }
+    return;
+}
+
+void HeartBeat(void) {
+    static int ia = 0;
+    static int ib = 0;
+#define HB 2
+
+    ia++;
+    if (ia > HB * 2) {
+        DisplayDataSetRow(0);
+        DisplayDataAddString("x ");
+        ia = 0;
+        ib++;
+//        DisplayDataAddInteger(ib);
+//        DisplayDataAddString("  ");
+
+    } else if (ia == HB) {
+        DisplayDataSetRow(0);
+        DisplayDataAddString("o ");
+//      DisplayDataAddInteger(ib);
+//        DisplayDataAddString("  ");
+    }
+
+    return;
+}
+
+void DisplayValues(unsigned char row, unsigned long a, unsigned long b, int c, int d) {
+
+
+
+    char *buf[40];
+
+    //sprintf ( buf, "%5ld %5ld %5d %1d", a, b, c, d );
+
+    dspDisplayDataSetRow(row);
+    dspDisplayDataAddString(buf);
+
+
+    return;
+}
+
+void DisplayDataAddString(unsigned char *string) {
+
+    dspDisplayDataAddString(string);
+    return;
+}
+
+void DisplayDataAddInteger(int in) {
+
+    dspDisplayDataAddInteger(in);
+    return;
+}
+
+void DisplayDataSetRow(unsigned char row) {
+
+    dspDisplayDataSetRow(row);
+    return;
+}
+
+void dspDisplayInit(void) {
+
+    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR = 0b0;
+    DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR = 0b0;
+    DISPLAY_BIT_ENABLE__HIGH_LO_DIR = 0b0;
+
+    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
+    
+    //    DISPLAY_DATA_WRITE = 0b00000000;
+
+    DSP0_PORT_DIR = 0b0;
+    DSP1_PORT_DIR = 0b0;
+    DSP2_PORT_DIR = 0b0;
+    DSP3_PORT_DIR = 0b0;
+    DSP4_PORT_DIR = 0b0;
+    DSP5_PORT_DIR = 0b0;
+    DSP6_PORT_DIR = 0b0;
+    DSP7_PORT_DIR = 0b0;
+
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ENTRY);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ON);
+
+    return;
+}
+
+void dspDisplayReset(void) {
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
+
+    return;
+}
+
+void dspDisplaySend(enum _DisplayCommand command, unsigned char data) {
+
+    switch (command) {
+        case sendCommand:
+            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b0;
+            break;
+        case sendData:
+            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b1;
+            break;
+        case setPosition:
+            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b0;
+            // bit 7 must be a 1
+            data |= 1 << 7;
+            break;
+        default:
+            break;
+    }
+
+    //    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
+
+    //DISPLAY_DATA_DIR_SET = 0b00000000;
+
+    DISPLAY_BIT_ENABLE__HIGH_LO = 0b1;
+
+    //    DISPLAY_DATA_WRITE = data;
+    //    PORTBbits.RB14 = (data & 0x01) >> 0;
+    //    PORTBbits.RB2  = (data & 0x02) >> 1;
+    //    PORTBbits.RB13 = (data & 0x04) >> 2;
+    //    PORTBbits.RB3  = (data & 0x08) >> 3;
+    //    PORTBbits.RB12 = (data & 0x10) >> 4;
+    //    PORTBbits.RB4  = (data & 0x20) >> 5;
+    //    PORTBbits.RB9  = (data & 0x40) >> 6;
+    //    PORTBbits.RB5  = (data & 0x80) >> 7;
+
+
+
+    DSP0_PORT = (data & 0b00000001) >> 0;
+    DSP1_PORT = (data & 0b00000010) >> 1;
+    DSP2_PORT = (data & 0b00000100) >> 2;
+    DSP3_PORT = (data & 0b00001000) >> 3;
+    DSP4_PORT = (data & 0b00010000) >> 4;
+    DSP5_PORT = (data & 0b00100000) >> 5;
+    DSP6_PORT = (data & 0b01000000) >> 6;
+    DSP7_PORT = (data & 0b10000000) >> 7;
+
+
+
+    DISPLAY_BIT_ENABLE__HIGH_LO = 0b0;
+    //  __delay_us ( 200 ); // we now check the busy bit
+    // need something else to happen here
+    // this feels like a big kludge
+    // this needs fixed
+
+    return;
+}
+
+
+//#define DSP0_PORT           PORTBbits.RB14
+//#define DSP1_PORT           PORTBbits.RB2
+//#define DSP2_PORT           PORTBbits.RB13
+//#define DSP3_PORT           PORTBbits.RB3
+//#define DSP4_PORT           PORTBbits.RB12
+//#define DSP5_PORT           PORTBbits.RB4
+//#define DSP6_PORT           PORTBbits.RB9
+//#define DSP7_PORT           PORTBbits.RB5
+//
+//    PORTBbits.RB0 = 0;                 //low for command CTL1    
+//    PORTBbits.RB1  = 0b1; // E
+//    
+//    PORTBbits.RB14 = (command & 0x01) >> 0;
+//    PORTBbits.RB2  = (command & 0x02) >> 1;
+//    PORTBbits.RB13 = (command & 0x04) >> 2;
+//    PORTBbits.RB3  = (command & 0x08) >> 3;
+//    PORTBbits.RB12 = (command & 0x10) >> 4;
+//    PORTBbits.RB4  = (command & 0x20) >> 5;
+//    PORTBbits.RB9  = (command & 0x40) >> 6;
+//    PORTBbits.RB5  = (command & 0x80) >> 7;
+
+void dspDisplayDataAddOne(enum _DisplayCommand command, unsigned char data) {
+
+    if (DisplayDataPositionWrite <= DISPLAY_DATA_POSITION_MAX) {
+        DisplayData[DisplayDataPositionWrite].command = command;
+        DisplayData[DisplayDataPositionWrite].data = data;
+        DisplayDataPositionWrite++;
+    }
+
+    return;
+}
+
+void dspDisplayDataSetRow(unsigned char row) {
+    unsigned char rowValue;
+    switch (row) {
+        case 0:
+            rowValue = 0x00;
+            break;
+        case 1:
+            rowValue = 0x40;
+            break;
+        case 2:
+            rowValue = 0x14;
+            break;
+        case 3:
+            rowValue = 0x54;
+            break;
+        default:
+            rowValue = 0x00;
+            break;
+    }
+
+    dspDisplayDataAddOne(setPosition, rowValue);
+
+    return;
+}
+
+void dspDisplayDataAddString(unsigned char *string) {
+    for (unsigned char i = 0; i < strlen(string); i++) {
+        dspDisplayDataAddOne(sendData, string[i]);
+    }
+
+    return;
+}
+
+void dspDisplayDataAddInteger(int in) {
+    char temp[6];
+
+    //itoa(temp, in, 10);
+
+    dspDisplayDataAddString(temp);
+
+    return;
+}
+
+void dspDisplayLoop(int count) {
+    // reading busy flag does not work correctly right now
+    // need to check it out
+
+    for (int i = 0; i < count; i++) {
+        //if ( IsDisplayBusy ( ) == 0 )
+        {
+            if (DisplayDataPositionRead < DisplayDataPositionWrite) {
+                dspDisplaySend(DisplayData[DisplayDataPositionRead].command, DisplayData[DisplayDataPositionRead].data);
+                DisplayDataPositionRead++;
+
+                if (DisplayDataPositionRead >= DisplayDataPositionWrite) {
+                    // we have caught up with all of the write data - so reset
+                    DisplayDataPositionRead = 0;
+                    DisplayDataPositionWrite = 0;
+                }
+            }
+        }
+    }
+
+    return;
+}
+
+//#define DSP0_PORT           14
+//#define DSP1_PORT           2
+//#define DSP2_PORT           13
+//#define DSP3_PORT           3
+//#define DSP4_PORT           12
+//#define DSP5_PORT           4
+//#define DSP6_PORT           9
+//#define DSP7_PORT           5
+//
+//    PORTBbits.RB0 = 0;                 //low for command CTL1    
+//    PORTBbits.RB1  = 0b1; // E
+//    
+//    PORTBbits.RB14 = (command & 0x01) >> 0;
+//    PORTBbits.RB2  = (command & 0x02) >> 1;
+//    PORTBbits.RB13 = (command & 0x04) >> 2;
+//    PORTBbits.RB3  = (command & 0x08) >> 3;
+//    PORTBbits.RB12 = (command & 0x10) >> 4;
+//    PORTBbits.RB4  = (command & 0x20) >> 5;
+//    PORTBbits.RB9  = (command & 0x40) >> 6;
+//    PORTBbits.RB5  = (command & 0x80) >> 7;
+
+
+
+
+
+/*
+unsigned char IsDisplayBusy ( void )
+{
+    unsigned char isBusy;
+
+    DISPLAY_DATA_DIR_BUSY_FLAG = 0b1;
+//    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b1;
+    isBusy = DISPLAY_BIT_BUSY_FLAG;
+//    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
+    DISPLAY_DATA_DIR_BUSY_FLAG = 0b0;
+
+    return (isBusy );
+
+}
+
+ */
+
 
