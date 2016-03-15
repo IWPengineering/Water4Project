@@ -111,7 +111,7 @@ void dspDisplayReset(void);
 void dspDisplaySend(enum _DisplayCommand, unsigned char);
 void dspDisplayDataAddOne(enum _DisplayCommand, unsigned char);
 void dspDisplayDataSetRow(unsigned char);
-void dspDisplayDataAddString(unsigned char *);
+void dspDisplayDataAddString(unsigned char *, int size);
 void dspDisplayDataAddInteger(int);
 void dspDisplayLoop(int);
 
@@ -128,7 +128,7 @@ unsigned char DisplayDataPositionInverse;
 
 void DisplayInit(void);
 void DisplayLoop(int);
-void DisplayDataAddString(unsigned char *);
+void DisplayDataAddString(unsigned char *, int size);
 void DisplayDataAddInteger(int);
 void DisplayDataSetRow(unsigned char);
 void DisplayValues(unsigned char, unsigned long, unsigned long, int, int);
@@ -137,7 +137,7 @@ void HeartBeat(void);
 
 
 #define DSP0_PORT           LATBbits.LATB12
-#define DSP1_PORT           LATBbits.LATB11
+#define DSP1_PORT           LATAbits.LATA7
 #define DSP2_PORT           LATBbits.LATB9
 #define DSP3_PORT           LATBbits.LATB5
 #define DSP4_PORT           LATBbits.LATB14
@@ -146,7 +146,7 @@ void HeartBeat(void);
 #define DSP7_PORT           LATBbits.LATB3
 
 #define DSP0_PORT_DIR       TRISBbits.TRISB12 //  LATBbits.RB14
-#define DSP1_PORT_DIR       TRISBbits.TRISB11 //    LATBbits.RB2
+#define DSP1_PORT_DIR       TRISAbits.TRISA7 //    LATBbits.RB2
 #define DSP2_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB13
 #define DSP3_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB3
 #define DSP4_PORT_DIR       TRISBbits.TRISB14 //    LATBbits.RB12
@@ -173,9 +173,9 @@ void initialization(void) {
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
     //TRISB = 0xFFFF; // Sets all of port B to input
     TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
-    
-    
-   
+
+
+
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
@@ -318,36 +318,52 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) {
 
         IFS1bits.CNIF = 0;
     }
+    
+    IFS1bits.CNIF = 0;
 
 }
 
 void hoursToAsciiDisplay(int hours) {
     int startLcdView = 0;
+
+    DisplayDataSetRow(1);
+    unsigned char aryPtr[] = "Hours: ";
+    DisplayDataAddString(aryPtr, sizeof ("Hours: "));
+
     if (hours == 0) {
-        //        sendData(48); // send 0 as the number of hours
+        DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
     } else {
         if (startLcdView || hours / 10000 != 0) {
-            //          sendData(hours / 10000 + 48);
+            DisplayDataAddCharacter(hours / 10000 + 48);
             startLcdView = 1;
         }
         hours /= 10;
         if (startLcdView || hours / 1000 != 0) {
-            //        sendData(hours / 1000 + 48);
+            DisplayDataAddCharacter(hours / 1000 + 48);
             startLcdView = 1;
         }
         hours /= 10;
         if (startLcdView || hours / 100 != 0) {
-            //      sendData(hours / 100 + 48);
+            DisplayDataAddCharacter(hours / 100 + 48);
             startLcdView = 1;
         }
         hours /= 10;
         if (startLcdView || hours / 10 != 0) {
-            //    sendData(hours / 10 + 48);
+            DisplayDataAddCharacter(hours / 10 + 48);
             startLcdView = 1;
         }
         hours /= 10;
-        //sendData(hours + 48);
+        DisplayDataAddCharacter(hours + 48);
     }
+
+
+    DisplayDataAddCharacter(' ');
+    DisplayDataAddCharacter(' ');
+    DisplayDataAddCharacter(' ');
+    DisplayDataAddCharacter(' ');
+    DisplayDataAddCharacter(' ');
+
+    DisplayLoop(10);
 }
 
 /*
@@ -361,13 +377,14 @@ int main(void) {
     initialization();
 
     DisplayInit();
-        DisplayDataSetRow(0);
-        DisplayDataAddString("");
-        DisplayLoop(10);
-        DisplayLoop(10);
-        DisplayLoop(10);
-        DisplayLoop(10);
-    
+    DisplayDataSetRow(0);
+    unsigned char aryPtr[] = "";
+    DisplayDataAddString(aryPtr, sizeof (""));
+    DisplayLoop(10);
+    DisplayLoop(10);
+    DisplayLoop(10);
+    DisplayLoop(10);
+
     int counter = 0;
     int hourCounter = 0;
     //    PORTBbits.RB15 = 0; //R/W always low for write CTL2
@@ -384,8 +401,8 @@ int main(void) {
     while (1) {
         HeartBeat();
         DisplayLoop(10);
-        
-        delayMs(delayTime);
+
+        //        delayMs(delayTime);
         // is there water?
         if (readWaterSensor()) {
             counter++; // increments every half a second
@@ -399,7 +416,7 @@ int main(void) {
         if (buttonFlag) {
             buttonFlag = 0;
             hoursToAsciiDisplay(hourCounter);
-            delayMs(5000);
+            delayMs(500);
         }
     }
 
@@ -427,24 +444,46 @@ void DisplayLoop(int count) {
 void HeartBeat(void) {
     static int ia = 0;
     static int ib = 0;
-#define HB 2
-
+#define HB 5
+    /*
+        unsigned char ptr1[] = {
+            0xAA,
+            0x55,
+            0xAA,
+            0x55,
+            NULL
+        };
+        DisplayDataSetRow(0);
+        DisplayDataAddString(ptr1, 5);
+        unsigned char ptr2[] = {
+            0x55,
+            0xAA,
+            0x55,
+            0xAA,
+            NULL
+        };
+        DisplayDataSetRow(0);
+        DisplayDataAddString(ptr2, 5);
+     */
     ia++;
     if (ia > HB * 2) {
         DisplayDataSetRow(0);
-        DisplayDataAddString("x ");
+        unsigned char aryPtr[] = ":) /\\/\\/\\/\\/\\/\\/";
+        DisplayDataAddString(aryPtr, sizeof (":) /\\/\\/\\/\\/\\/\\/"));
         ia = 0;
         ib++;
-//        DisplayDataAddInteger(ib);
-//        DisplayDataAddString("  ");
+        //        DisplayDataAddInteger(ib);
+        //        DisplayDataAddString("  ");
 
     } else if (ia == HB) {
         DisplayDataSetRow(0);
-        DisplayDataAddString("o ");
-//      DisplayDataAddInteger(ib);
-//        DisplayDataAddString("  ");
-    }
+        unsigned char aryPtr[] = ":( \\/\\/\\/\\/\\/\\/\\";
+        DisplayDataAddString(aryPtr, sizeof (":( \\/\\/\\/\\/\\/\\/\\"));
 
+        //      DisplayDataAddInteger(ib);
+        //        DisplayDataAddString("  ");
+    }
+    //DisplayLoop(10);
     return;
 }
 
@@ -457,15 +496,21 @@ void DisplayValues(unsigned char row, unsigned long a, unsigned long b, int c, i
     //sprintf ( buf, "%5ld %5ld %5d %1d", a, b, c, d );
 
     dspDisplayDataSetRow(row);
-    dspDisplayDataAddString(buf);
+    dspDisplayDataAddString(buf, sizeof (*buf));
 
 
     return;
 }
 
-void DisplayDataAddString(unsigned char *string) {
+void DisplayDataAddString(unsigned char *string, int size) {
 
-    dspDisplayDataAddString(string);
+    dspDisplayDataAddString(string, size);
+    return;
+}
+
+void DisplayDataAddCharacter(unsigned char ch) {
+
+    dspDisplayDataAddOne(sendData, ch);
     return;
 }
 
@@ -488,7 +533,7 @@ void dspDisplayInit(void) {
     DISPLAY_BIT_ENABLE__HIGH_LO_DIR = 0b0;
 
     DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
-    
+
     //    DISPLAY_DATA_WRITE = 0b00000000;
 
     DSP0_PORT_DIR = 0b0;
@@ -631,8 +676,8 @@ void dspDisplayDataSetRow(unsigned char row) {
     return;
 }
 
-void dspDisplayDataAddString(unsigned char *string) {
-    for (unsigned char i = 0; i < strlen(string); i++) {
+void dspDisplayDataAddString(unsigned char *string, int size) {
+    for (unsigned char i = 0; i < size - 1; i++) {
         dspDisplayDataAddOne(sendData, string[i]);
     }
 
@@ -644,7 +689,7 @@ void dspDisplayDataAddInteger(int in) {
 
     //itoa(temp, in, 10);
 
-    dspDisplayDataAddString(temp);
+    dspDisplayDataAddString(temp, sizeof (temp));
 
     return;
 }
