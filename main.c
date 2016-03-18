@@ -137,17 +137,19 @@ void HeartBeat(void);
 
 
 #define DSP0_PORT           LATBbits.LATB12
-#define DSP1_PORT           LATAbits.LATA7
-#define DSP2_PORT           LATBbits.LATB9
+#define DSP1_PORT           LATBbits.LATB4 //LATAbits.LATA7     // pin 19 is on port a
+#define DSP2_PORT           LATAbits.LATA7 // pin 19 // LATBbits.LATB9
 #define DSP3_PORT           LATBbits.LATB5
 #define DSP4_PORT           LATBbits.LATB14
 #define DSP5_PORT           LATBbits.LATB2
 #define DSP6_PORT           LATBbits.LATB13
 #define DSP7_PORT           LATBbits.LATB3
 
+// That may be fine, but i don't think so , for kicks and giggles lets try pin 19?
+
 #define DSP0_PORT_DIR       TRISBbits.TRISB12 //  LATBbits.RB14
-#define DSP1_PORT_DIR       TRISAbits.TRISA7 //    LATBbits.RB2
-#define DSP2_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB13
+#define DSP1_PORT_DIR       TRISBbits.TRISB4 // TRISAbits.TRISA7 //    LATBbits.RB2
+#define DSP2_PORT_DIR       TRISAbits.TRISA7 // pin 19 // TRISBbits.TRISB9 //    LATBbits.RB13
 #define DSP3_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB3
 #define DSP4_PORT_DIR       TRISBbits.TRISB14 //    LATBbits.RB12
 #define DSP5_PORT_DIR       TRISBbits.TRISB2 //   LATBbits.RB4
@@ -318,17 +320,18 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) {
 
         IFS1bits.CNIF = 0;
     }
-    
+
     IFS1bits.CNIF = 0;
 
 }
 
-void hoursToAsciiDisplay(int hours) {
+void hoursToAsciiDisplay(int hours, int decimalHour) {
     int startLcdView = 0;
 
     DisplayDataSetRow(1);
     unsigned char aryPtr[] = "Hours: ";
     DisplayDataAddString(aryPtr, sizeof ("Hours: "));
+    //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
 
     if (hours == 0) {
         DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
@@ -355,6 +358,28 @@ void hoursToAsciiDisplay(int hours) {
         hours /= 10;
         DisplayDataAddCharacter(hours + 48);
     }
+    DisplayDataAddCharacter('.');
+
+    if (decimalHour == 0) {
+        DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
+    } else {
+        if (startLcdView || decimalHour / 1000 != 0) {
+            DisplayDataAddCharacter(decimalHour / 1000 + 48);
+            startLcdView = 1;
+        }
+        decimalHour /= 10;
+        if (startLcdView || decimalHour / 100 != 0) {
+            DisplayDataAddCharacter(decimalHour / 100 + 48);
+            startLcdView = 1;
+        }
+        decimalHour /= 10;
+        if (startLcdView || decimalHour / 10 != 0) {
+            DisplayDataAddCharacter(decimalHour / 10 + 48);
+            startLcdView = 1;
+        }
+        decimalHour /= 10;
+        DisplayDataAddCharacter(decimalHour + 48);
+    }
 
 
     DisplayDataAddCharacter(' ');
@@ -377,6 +402,18 @@ int main(void) {
     initialization();
 
     DisplayInit();
+
+    DSP0_PORT = 1;
+    DSP1_PORT = 1;
+    DSP2_PORT = 1;
+    DSP3_PORT = 1;
+    DSP4_PORT = 1;
+    DSP5_PORT = 1;
+    DSP6_PORT = 1;
+    DSP7_PORT = 1;
+
+    DisplayInit();
+
     DisplayDataSetRow(0);
     unsigned char aryPtr[] = "";
     DisplayDataAddString(aryPtr, sizeof (""));
@@ -397,7 +434,7 @@ int main(void) {
     //            sendData(0x6F);   //0
 
 
-
+ 
     while (1) {
         HeartBeat();
         DisplayLoop(10);
@@ -415,7 +452,10 @@ int main(void) {
 
         if (buttonFlag) {
             buttonFlag = 0;
-            hoursToAsciiDisplay(hourCounter);
+            //            hourCounter = 3;
+            //            counter = 7000;
+            hoursToAsciiDisplay(3, 952);
+            //            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
         }
     }
@@ -468,8 +508,8 @@ void HeartBeat(void) {
     ia++;
     if (ia > HB * 2) {
         DisplayDataSetRow(0);
-        unsigned char aryPtr[] = ":) /\\/\\/\\/\\/\\/\\/";
-        DisplayDataAddString(aryPtr, sizeof (":) /\\/\\/\\/\\/\\/\\/"));
+        unsigned char aryPtr[] = "x";
+        DisplayDataAddString(aryPtr, sizeof ("x"));
         ia = 0;
         ib++;
         //        DisplayDataAddInteger(ib);
@@ -477,8 +517,8 @@ void HeartBeat(void) {
 
     } else if (ia == HB) {
         DisplayDataSetRow(0);
-        unsigned char aryPtr[] = ":( \\/\\/\\/\\/\\/\\/\\";
-        DisplayDataAddString(aryPtr, sizeof (":( \\/\\/\\/\\/\\/\\/\\"));
+        unsigned char aryPtr[] = "o";
+        DisplayDataAddString(aryPtr, sizeof ("o"));
 
         //      DisplayDataAddInteger(ib);
         //        DisplayDataAddString("  ");
