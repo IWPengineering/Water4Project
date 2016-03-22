@@ -364,21 +364,30 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
     if (decimalHour == 0) {
         DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
     } else {
-        if (startLcdView || decimalHour / 1000 != 0) {
-            DisplayDataAddCharacter(decimalHour / 1000 + 48);
-            startLcdView = 1;
-            decimalHour = decimalHour - ((decimalHour / 1000) * 1000);
-        }
+//        if (startLcdView || decimalHour / 1000 != 0) {
+//            DisplayDataAddCharacter(decimalHour / 1000 + 48);
+//            startLcdView = 1;
+//            decimalHour = decimalHour - ((decimalHour / 1000) * 1000);
+//        }
+//        else {
+//            DisplayDataAddCharacter(48);
+//        }
         
         if (startLcdView || decimalHour / 100 != 0) {
             DisplayDataAddCharacter(decimalHour / 100 + 48);
             startLcdView = 1;
             decimalHour = decimalHour - ((decimalHour / 100) * 100);
         }
+        else{
+            DisplayDataAddCharacter(48);
+        }
         if (startLcdView || decimalHour / 10 != 0) {
             DisplayDataAddCharacter(decimalHour / 10 + 48);
             startLcdView = 1;
             decimalHour = decimalHour - ((decimalHour / 10) * 10);
+        }
+        else{
+            DisplayDataAddCharacter(48);
         }
         
         DisplayDataAddCharacter(decimalHour + 48);
@@ -404,7 +413,7 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
 int main(void) {
     initialization();
     TRISAbits.TRISA2 = 0;
-    PORTAbits.RA2 = 1;
+    PORTAbits.RA2 = 0;
 
 //    DSP0_PORT = 1;
 //    DSP1_PORT = 1;
@@ -445,6 +454,7 @@ int main(void) {
  
     while (1) {
         HeartBeat();
+        delayMs(500);
         DisplayLoop(10);
 
         //        delayMs(delayTime);
@@ -462,8 +472,8 @@ int main(void) {
             buttonFlag = 0;
             //            hourCounter = 3;
             //            counter = 7000;
-            hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
-            //            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
+            //hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
+            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
         }
     }
