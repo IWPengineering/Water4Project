@@ -11,7 +11,8 @@
 #include <math.h>
 #include <xc.h>
 #include <string.h>
-
+#include "display.h"
+#include "utilities.h"
 
 
 
@@ -64,97 +65,7 @@ static volatile int buttonFlag = 0; // alerts us that the button has been pushed
 
 
 
-/**********************/
-/**********************/
-/**********************/
-/**********************/
-/**********************/
-/***************************************/
-/****  DISPLAY SPECIFIC  ******/
-#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  LATBbits.LATB0 // LATAbits.LATA6
-#define DISPLAY_BIT_SELECT_DIR__READ_WRITE LATBbits.LATB15
-#define DISPLAY_BIT_ENABLE__HIGH_LO LATBbits.LATB1 // LATAbits.LATA4
-//#define DISPLAY_BIT_BUSY_FLAG PORTBbits.RB7
 
-#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR TRISBbits.TRISB0 // TRISAbits.TRISA6 // LATAbits.LATA6
-#define DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR TRISBbits.TRISB15 // LATAbits.LATA7
-#define DISPLAY_BIT_ENABLE__HIGH_LO_DIR TRISBbits.TRISB1 // TRISAbits.TRISA4 // LATAbits.LATA4
-
-
-//#define DISPLAY_DATA_WRITE LATB
-//#define DISPLAY_DATA_DIR_SET TRISB
-//#define DISPLAY_DATA_DIR_BUSY_FLAG TRISBbits.TRISB7
-
-//#define DISPLAY_LOOP_COUNT 5
-
-#define DISPLAY_COMMAND_FUNCTION_SET 0x34//0b00111001
-#define DISPLAY_COMMAND_OFF 0b00001000
-#define DISPLAY_COMMAND_CLEAR 0b00000001
-#define DISPLAY_COMMAND_ENTRY 0b00000110
-#define DISPLAY_COMMAND_HOME 0b00000010
-#define DISPLAY_COMMAND_ON 0b00001100
-
-typedef enum _DisplayCommand {
-    sendCommand = 1,
-    sendData = 2,
-    setPosition = 3
-};
-
-struct _DisplayData {
-    enum _DisplayCommand command;
-    unsigned char data;
-};
-
-
-void dspDisplayInit(void);
-void dspDisplayReset(void);
-void dspDisplaySend(enum _DisplayCommand, unsigned char);
-void dspDisplayDataAddOne(enum _DisplayCommand, unsigned char);
-void dspDisplayDataSetRow(unsigned char);
-void dspDisplayDataAddString(unsigned char *, int size);
-void dspDisplayDataAddInteger(int);
-void dspDisplayLoop(int);
-
-
-#define DISPLAY_DATA_POSITION_MAX 75
-struct _DisplayData DisplayData[DISPLAY_DATA_POSITION_MAX];
-unsigned char DisplayDataPositionRead = 0;
-unsigned char DisplayDataPositionWrite = 0;
-unsigned char DisplayDataPositionInverse;
-
-/***********************************************
- END DISPLAY SPECIFIC
- *******************************************/
-
-void DisplayInit(void);
-void DisplayLoop(int);
-void DisplayDataAddString(unsigned char *, int size);
-void DisplayDataAddInteger(int);
-void DisplayDataSetRow(unsigned char);
-void DisplayValues(unsigned char, unsigned long, unsigned long, int, int);
-void HeartBeat(void);
-
-
-
-#define DSP0_PORT           LATBbits.LATB14
-#define DSP1_PORT           LATBbits.LATB2 //LATAbits.LATA7     // pin 19 is on port a
-#define DSP2_PORT           LATBbits.LATB13 // LATAbits.LATA7 // pin 19 //
-#define DSP3_PORT           LATBbits.LATB3
-#define DSP4_PORT           LATBbits.LATB12
-#define DSP5_PORT           LATAbits.LATA7 //LATBbits.LATB7
-#define DSP6_PORT           LATBbits.LATB9
-#define DSP7_PORT           LATBbits.LATB5
-
-// That may be fine, but i don't think so , for kicks and giggles lets try pin 19?
-
-#define DSP0_PORT_DIR       TRISBbits.TRISB14 //  LATBbits.RB14
-#define DSP1_PORT_DIR       TRISBbits.TRISB2 // TRISAbits.TRISA7 //    LATBbits.RB2
-#define DSP2_PORT_DIR       TRISBbits.TRISB13 // TRISAbits.TRISA7 // pin 19 // TRISBbits.TRISB9 //    LATBbits.RB13
-#define DSP3_PORT_DIR       TRISBbits.TRISB3 //    LATBbits.RB3
-#define DSP4_PORT_DIR       TRISBbits.TRISB12 //    LATBbits.RB12
-#define DSP5_PORT_DIR       TRISAbits.TRISA7 //TRISBbits.TRISB7 //   LATBbits.RB4
-#define DSP6_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB9
-#define DSP7_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB5
 
 
 void initAdc(void); // forward declaration of init adc
@@ -290,25 +201,6 @@ int readAdc(int channel) //check with accelerometer
     return ADC1BUF0;
 }
 
-/*********************************************************************
- * Function: delayMs()
- * Input: milliseconds
- * Output: None
- * Overview: Delays the specified number of milliseconds
- * Note: Depends on Clock speed. Pic Dependent
- * TestDate: 05-20-14
- ********************************************************************/
-void delayMs(int ms) {
-    int myIndex;
-    while (ms > 0) {
-        myIndex = 0;
-        while (myIndex < 667) {
-            myIndex++;
-        }
-        ms--;
-    }
-}
-
 void __attribute__((__interrupt__, __auto_psv__)) _DefaultInterrupt() { //Tested 06-05-2014
 
 }
@@ -400,7 +292,7 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
     DisplayDataAddCharacter(' ');
     DisplayDataAddCharacter(' ');
 
-    DisplayLoop(30);
+    DisplayLoop(30, true);
 }
 
 /*
@@ -428,14 +320,13 @@ int main(void) {
    //DisplayLoop(10);
    delayMs(1000);
  
-    DisplayDataSetRow(0);
         unsigned char aryPtr[] = ":-)";
         DisplayDataAddString(aryPtr, sizeof (":-)"));
 
         DisplayDataAddCharacter( 0xFF);
         
 
-    DisplayLoop(10);
+    DisplayLoop(10, true);
 
     
     //delayMs(10000);
@@ -455,7 +346,7 @@ int main(void) {
     while (1) {
         //HeartBeat();
         delayMs(500);
-        DisplayLoop(10);
+        DisplayLoop(10, true);
 
         //        delayMs(delayTime);
         // is there water?
@@ -473,7 +364,6 @@ int main(void) {
             //            hourCounter = 3;
             //            counter = 7000;
             //hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
-            dspDisplaySend(sendCommand, 0x01);
             delayMs(10);
             hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
@@ -481,326 +371,6 @@ int main(void) {
     }
 
     return -1;
-}
-
-/*********************************
- DISPLAY FUNCTIONS
- * first functions only call the internal functions if we are using them
- * second set are entirely excluded if we are not using display features
- * this should help turn on and off the display without much trouble
- *********************************/
-void DisplayInit(void) {
-    dspDisplayInit();
-    return;
-}
-
-void DisplayLoop(int count) {
-    for (int inx = 0; inx < count; inx++) {
-        dspDisplayLoop(1);
-    }
-    return;
-}
-
-void HeartBeat(void) {
-    static int ia = 0;
-    static int ib = 0;
-#define HB 5
-    /*
-        unsigned char ptr1[] = {
-            0xAA,
-            0x55,
-            0xAA,
-            0x55,
-            NULL
-        };
-        DisplayDataSetRow(0);
-        DisplayDataAddString(ptr1, 5);
-        unsigned char ptr2[] = {
-            0x55,
-            0xAA,
-            0x55,
-            0xAA,
-            NULL
-        };
-        DisplayDataSetRow(0);
-        DisplayDataAddString(ptr2, 5);
-     */
-    ia++;
-    if (ia > HB * 2) {
-        DisplayDataSetRow(0);
-        unsigned char aryPtr[] = "x";
-        DisplayDataAddString(aryPtr, sizeof ("x"));
-        ia = 0;
-        ib++;
-        //        DisplayDataAddInteger(ib);
-        //        DisplayDataAddString("  ");
-
-    } else if (ia == HB) {
-        DisplayDataSetRow(0);
-        unsigned char aryPtr[] = "o";
-        DisplayDataAddString(aryPtr, sizeof ("o"));
-
-        //      DisplayDataAddInteger(ib);
-        //        DisplayDataAddString("  ");
-    }
-    //DisplayLoop(10);
-    return;
-}
-
-void DisplayValues(unsigned char row, unsigned long a, unsigned long b, int c, int d) {
-
-
-
-    char *buf[40];
-
-    //sprintf ( buf, "%5ld %5ld %5d %1d", a, b, c, d );
-
-    dspDisplayDataSetRow(row);
-    dspDisplayDataAddString(buf, sizeof (*buf));
-
-
-    return;
-}
-
-void DisplayDataAddString(unsigned char *string, int size) {
-
-    dspDisplayDataAddString(string, size);
-    return;
-}
-
-void DisplayDataAddCharacter(unsigned char ch) {
-
-    dspDisplayDataAddOne(sendData, ch);
-    return;
-}
-
-void DisplayDataAddInteger(int in) {
-
-    dspDisplayDataAddInteger(in);
-    return;
-}
-
-void DisplayDataSetRow(unsigned char row) {
-
-    dspDisplayDataSetRow(row);
-    return;
-}
-
-void dspDisplayInit(void) {
-
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR = 0b0;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR = 0b0;
-    DISPLAY_BIT_ENABLE__HIGH_LO_DIR = 0b0;
-
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
-
-    //    DISPLAY_DATA_WRITE = 0b00000000;
-
-    DSP0_PORT_DIR = 0b0;
-    DSP1_PORT_DIR = 0b0;
-    DSP2_PORT_DIR = 0b0;
-    DSP3_PORT_DIR = 0b0;
-    DSP4_PORT_DIR = 0b0;
-    DSP5_PORT_DIR = 0b0;
-    DSP6_PORT_DIR = 0b0;
-    DSP7_PORT_DIR = 0b0;
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1);
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1);
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1);
-    delayMs(100);
-    /*
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, 0x10);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ENTRY);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ON);
-    DisplayLoop(1);
-    */
-    dspDisplayDataAddOne(sendCommand, 0x38);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, 0x10);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, 0x0C);
-    DisplayLoop(1);
-    dspDisplayDataAddOne(sendCommand, 0x06);
-    DisplayLoop(1);
-    
-    return;
-}
-
-void dspDisplayReset(void) {
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
-    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
-
-    return;
-}
-
-void dspDisplaySend(enum _DisplayCommand command, unsigned char data) {
-
-    switch (command) {
-        case sendCommand:
-            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b0;
-            break;
-        case sendData:
-            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b1;
-            break;
-        case setPosition:
-            DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 0b0;
-            // bit 7 must be a 1
-            data |= 1 << 7;
-            break;
-        default:
-            break;
-    }
-
-    //    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
-
-    //DISPLAY_DATA_DIR_SET = 0b00000000;
-
-    DISPLAY_BIT_ENABLE__HIGH_LO = 0b1;
-
-    //    DISPLAY_DATA_WRITE = data;
-    //    PORTBbits.RB14 = (data & 0x01) >> 0;
-    //    PORTBbits.RB2  = (data & 0x02) >> 1;
-    //    PORTBbits.RB13 = (data & 0x04) >> 2;
-    //    PORTBbits.RB3  = (data & 0x08) >> 3;
-    //    PORTBbits.RB12 = (data & 0x10) >> 4;
-    //    PORTBbits.RB4  = (data & 0x20) >> 5;
-    //    PORTBbits.RB9  = (data & 0x40) >> 6;
-    //    PORTBbits.RB5  = (data & 0x80) >> 7;
-
-
-
-    DSP0_PORT = (data & 0b00000001) >> 0;
-    DSP1_PORT = (data & 0b00000010) >> 1;
-    DSP2_PORT = (data & 0b00000100) >> 2;
-    DSP3_PORT = (data & 0b00001000) >> 3;
-    DSP4_PORT = (data & 0b00010000) >> 4;
-    DSP5_PORT = (data & 0b00100000) >> 5;
-    DSP6_PORT = (data & 0b01000000) >> 6;
-    DSP7_PORT = (data & 0b10000000) >> 7;
-
-
-
-    DISPLAY_BIT_ENABLE__HIGH_LO = 0b0;
-    //  __delay_us ( 200 ); // we now check the busy bit
-    // need something else to happen here
-    // this feels like a big kludge
-    // this needs fixed
-
-    return;
-}
-
-
-//#define DSP0_PORT           PORTBbits.RB14
-//#define DSP1_PORT           PORTBbits.RB2
-//#define DSP2_PORT           PORTBbits.RB13
-//#define DSP3_PORT           PORTBbits.RB3
-//#define DSP4_PORT           PORTBbits.RB12
-//#define DSP5_PORT           PORTBbits.RB4
-//#define DSP6_PORT           PORTBbits.RB9
-//#define DSP7_PORT           PORTBbits.RB5
-//
-//    PORTBbits.RB0 = 0;                 //low for command CTL1    
-//    PORTBbits.RB1  = 0b1; // E
-//    
-//    PORTBbits.RB14 = (command & 0x01) >> 0;
-//    PORTBbits.RB2  = (command & 0x02) >> 1;
-//    PORTBbits.RB13 = (command & 0x04) >> 2;
-//    PORTBbits.RB3  = (command & 0x08) >> 3;
-//    PORTBbits.RB12 = (command & 0x10) >> 4;
-//    PORTBbits.RB4  = (command & 0x20) >> 5;
-//    PORTBbits.RB9  = (command & 0x40) >> 6;
-//    PORTBbits.RB5  = (command & 0x80) >> 7;
-
-void dspDisplayDataAddOne(enum _DisplayCommand command, unsigned char data) {
-
-    if (DisplayDataPositionWrite <= DISPLAY_DATA_POSITION_MAX) {
-        DisplayData[DisplayDataPositionWrite].command = command;
-        DisplayData[DisplayDataPositionWrite].data = data;
-        DisplayDataPositionWrite++;
-    }
-
-    return;
-}
-
-void dspDisplayDataSetRow(unsigned char row) {
-    unsigned char rowValue;
-    switch (row) {
-        case 0:
-            rowValue = 0x00;
-            break;
-        case 1:
-            rowValue = 0x40;
-            break;
-        case 2:
-            rowValue = 0x14;
-            break;
-        case 3:
-            rowValue = 0x54;
-            break;
-        default:
-            rowValue = 0x00;
-            break;
-    }
-
-    dspDisplayDataAddOne(setPosition, rowValue);
-
-    return;
-}
-
-void dspDisplayDataAddString(unsigned char *string, int size) {
-    for (unsigned char i = 0; i < size - 1; i++) {
-        dspDisplayDataAddOne(sendData, string[i]);
-    }
-
-    return;
-}
-
-void dspDisplayDataAddInteger(int in) {
-    char temp[6];
-
-    //itoa(temp, in, 10);
-
-    dspDisplayDataAddString(temp, sizeof (temp));
-
-    return;
-}
-
-void dspDisplayLoop(int count) {
-    // reading busy flag does not work correctly right now
-    // need to check it out
-    for (int i = 0; i < count; i++) {
-        //if ( IsDisplayBusy ( ) == 0 )
-        {
-            if (DisplayDataPositionRead < DisplayDataPositionWrite) {
-                dspDisplaySend(DisplayData[DisplayDataPositionRead].command, DisplayData[DisplayDataPositionRead].data);
-                DisplayDataPositionRead++;
-
-                if (DisplayDataPositionRead >= DisplayDataPositionWrite) {
-                    // we have caught up with all of the write data - so reset
-                    DisplayDataPositionRead = 0;
-                    DisplayDataPositionWrite = 0;
-                }
-            }
-        }
-    }
-
-    return;
 }
 
 //#define DSP0_PORT           14
