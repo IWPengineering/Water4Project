@@ -22,11 +22,11 @@ Command:
   -Lc:/program files (x86)/microchip/xc16/v1.24/bin/bin/../../lib/dsPIC33F \
   -Lc:/program files (x86)/microchip/xc16/v1.24/bin/bin/../../support/dsPIC33F/gld \
   build/default/debug/main.o \
-  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00001a98.00 \
-  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00001a98.01 \
-  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00001a98.02 \
-  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00001a98.03 \
-  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00001a98.04 \
+  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00003084.00 \
+  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00003084.01 \
+  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00003084.02 \
+  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00003084.03 \
+  -TC:\Users\Jacqui\AppData\Local\Temp\tmp00003084.04 \
   --defsym=__MPLAB_BUILD=1 \
   --defsym=__MPLAB_DEBUG=1 \
   --defsym=__DEBUG=1 \
@@ -85,10 +85,10 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200                0x9e            0xed  (237)
 .const                       0x29e                 0x2             0x3  (3)
-.text                        0x2a0               0x742           0xae3  (2787)
-.dinit                       0x9e2                 0x8             0xc  (12)
+.text                        0x2a0               0x73e           0xadd  (2781)
+.dinit                       0x9de                 0x8             0xc  (12)
 
-                     Total program memory used (bytes):          0xbdf  (3039) 9%
+                     Total program memory used (bytes):          0xbd9  (3033) 9%
 
 
 Data Memory  [Origin = 0x800, Length = 0x800]
@@ -144,36 +144,36 @@ External Symbols in Program Memory (by address):
                   0x0003f4                  __DefaultInterrupt
                   0x000406                  __CNInterrupt
                   0x000432                  _hoursToAsciiDisplay
-                  0x000618                  _main
-                  0x000690                  _DisplayInit
-                  0x000698                  _DisplayLoop
-                  0x0006b4                  _HeartBeat
-                  0x0006f6                  _DisplayValues
-                  0x000716                  _DisplayDataAddString
-                  0x000726                  _DisplayDataAddCharacter
-                  0x000734                  _DisplayDataAddInteger
-                  0x000740                  _DisplayDataSetRow
-                  0x00074c                  _dspDisplayInit
-                  0x00078e                  _dspDisplayReset
-                  0x0007a0                  _dspDisplaySend
-                  0x0008b0                  _dspDisplayDataAddOne
-                  0x0008ee                  _dspDisplayDataSetRow
-                  0x000934                  _dspDisplayDataAddString
-                  0x000962                  _dspDisplayDataAddInteger
-                  0x000972                  _dspDisplayLoop
+                  0x00061c                  _main
+                  0x00068c                  _DisplayInit
+                  0x000694                  _DisplayLoop
+                  0x0006b0                  _HeartBeat
+                  0x0006f2                  _DisplayValues
+                  0x000712                  _DisplayDataAddString
+                  0x000722                  _DisplayDataAddCharacter
+                  0x000730                  _DisplayDataAddInteger
+                  0x00073c                  _DisplayDataSetRow
+                  0x000748                  _dspDisplayInit
+                  0x00078a                  _dspDisplayReset
+                  0x00079c                  _dspDisplaySend
+                  0x0008ac                  _dspDisplayDataAddOne
+                  0x0008ea                  _dspDisplayDataSetRow
+                  0x000930                  _dspDisplayDataAddString
+                  0x00095e                  _dspDisplayDataAddInteger
+                  0x00096e                  _dspDisplayLoop
                   0xf80000                  __FBS.sec
                   0xf80004                  __FGS.sec
 
 External Symbols in Program Memory (by name):
 
-                  0x000726                  _DisplayDataAddCharacter
-                  0x000734                  _DisplayDataAddInteger
-                  0x000716                  _DisplayDataAddString
-                  0x000740                  _DisplayDataSetRow
-                  0x000690                  _DisplayInit
-                  0x000698                  _DisplayLoop
-                  0x0006f6                  _DisplayValues
-                  0x0006b4                  _HeartBeat
+                  0x000722                  _DisplayDataAddCharacter
+                  0x000730                  _DisplayDataAddInteger
+                  0x000712                  _DisplayDataAddString
+                  0x00073c                  _DisplayDataSetRow
+                  0x00068c                  _DisplayInit
+                  0x000694                  _DisplayLoop
+                  0x0006f2                  _DisplayValues
+                  0x0006b0                  _HeartBeat
                   0x000406                  __CNInterrupt
                   0x0003f4                  __DefaultInterrupt
                   0xf80000                  __FBS.sec
@@ -183,18 +183,18 @@ External Symbols in Program Memory (by name):
                   0x00022c                  __psv_init
                   0x000200                  __resetPRI
                   0x0003ce                  _delayMs
-                  0x000962                  _dspDisplayDataAddInteger
-                  0x0008b0                  _dspDisplayDataAddOne
-                  0x000934                  _dspDisplayDataAddString
-                  0x0008ee                  _dspDisplayDataSetRow
-                  0x00074c                  _dspDisplayInit
-                  0x000972                  _dspDisplayLoop
-                  0x00078e                  _dspDisplayReset
-                  0x0007a0                  _dspDisplaySend
+                  0x00095e                  _dspDisplayDataAddInteger
+                  0x0008ac                  _dspDisplayDataAddOne
+                  0x000930                  _dspDisplayDataAddString
+                  0x0008ea                  _dspDisplayDataSetRow
+                  0x000748                  _dspDisplayInit
+                  0x00096e                  _dspDisplayLoop
+                  0x00078a                  _dspDisplayReset
+                  0x00079c                  _dspDisplaySend
                   0x000432                  _hoursToAsciiDisplay
                   0x00034c                  _initAdc
                   0x0002a0                  _initialization
-                  0x000618                  _main
+                  0x00061c                  _main
                   0x00029e                  _pulseWidthThreshold
                   0x00039e                  _readAdc
                   0x0002da                  _readWaterSensor
@@ -326,18 +326,18 @@ __FDS
 .comment
  *(.comment)
 
-.debug_info       0x000000       0x1fed
+.debug_info       0x000000       0x1fcd
  *(.debug_info)
- .debug_info      0x000000       0x1fed build/default/debug/main.o
+ .debug_info      0x000000       0x1fcd build/default/debug/main.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000        0x291
+.debug_abbrev     0x000000        0x284
  *(.debug_abbrev)
- .debug_abbrev    0x000000        0x291 build/default/debug/main.o
+ .debug_abbrev    0x000000        0x284 build/default/debug/main.o
 
-.debug_line       0x000000        0xa47
+.debug_line       0x000000        0xa79
  *(.debug_line)
- .debug_line      0x000000        0xa47 build/default/debug/main.o
+ .debug_line      0x000000        0xa79 build/default/debug/main.o
 
 .debug_frame      0x000000        0x1a4
  *(.debug_frame)
@@ -1288,8 +1288,8 @@ __c30_signature
  .const             0x829e          0x2 build/default/debug/main.o
                     0x829e                  _pulseWidthThreshold
 
-.text             0x0002a0        0x742
- .text            0x0002a0        0x742 build/default/debug/main.o
+.text             0x0002a0        0x73e
+ .text            0x0002a0        0x73e build/default/debug/main.o
                   0x0002a0                  _initialization
                   0x0002da                  _readWaterSensor
                   0x00034c                  _initAdc
@@ -1298,23 +1298,23 @@ __c30_signature
                   0x0003f4                  __DefaultInterrupt
                   0x000406                  __CNInterrupt
                   0x000432                  _hoursToAsciiDisplay
-                  0x000618                  _main
-                  0x000690                  _DisplayInit
-                  0x000698                  _DisplayLoop
-                  0x0006b4                  _HeartBeat
-                  0x0006f6                  _DisplayValues
-                  0x000716                  _DisplayDataAddString
-                  0x000726                  _DisplayDataAddCharacter
-                  0x000734                  _DisplayDataAddInteger
-                  0x000740                  _DisplayDataSetRow
-                  0x00074c                  _dspDisplayInit
-                  0x00078e                  _dspDisplayReset
-                  0x0007a0                  _dspDisplaySend
-                  0x0008b0                  _dspDisplayDataAddOne
-                  0x0008ee                  _dspDisplayDataSetRow
-                  0x000934                  _dspDisplayDataAddString
-                  0x000962                  _dspDisplayDataAddInteger
-                  0x000972                  _dspDisplayLoop
+                  0x00061c                  _main
+                  0x00068c                  _DisplayInit
+                  0x000694                  _DisplayLoop
+                  0x0006b0                  _HeartBeat
+                  0x0006f2                  _DisplayValues
+                  0x000712                  _DisplayDataAddString
+                  0x000722                  _DisplayDataAddCharacter
+                  0x000730                  _DisplayDataAddInteger
+                  0x00073c                  _DisplayDataSetRow
+                  0x000748                  _dspDisplayInit
+                  0x00078a                  _dspDisplayReset
+                  0x00079c                  _dspDisplaySend
+                  0x0008ac                  _dspDisplayDataAddOne
+                  0x0008ea                  _dspDisplayDataSetRow
+                  0x000930                  _dspDisplayDataAddString
+                  0x00095e                  _dspDisplayDataAddInteger
+                  0x00096e                  _dspDisplayLoop
 
-.dinit            0x0009e2          0x8
- .dinit           0x0009e2          0x8 data_init
+.dinit            0x0009de          0x8
+ .dinit           0x0009de          0x8 data_init

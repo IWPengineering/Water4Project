@@ -336,48 +336,51 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
     if (hours == 0) {
         DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
     } else {
-        if (startLcdView || hours / 10000 != 0) {
+        if (startLcdView || (hours / 10000 != 0)) {
             DisplayDataAddCharacter(hours / 10000 + 48);
             startLcdView = 1;
+            hours = hours - ((hours / 10000) * 10000); // moving the decimal point - taking advantage of int rounding
         }
-        hours /= 10;
+        
         if (startLcdView || hours / 1000 != 0) {
             DisplayDataAddCharacter(hours / 1000 + 48);
             startLcdView = 1;
+            hours = hours - ((hours / 1000) * 1000);
         }
-        hours /= 10;
         if (startLcdView || hours / 100 != 0) {
             DisplayDataAddCharacter(hours / 100 + 48);
             startLcdView = 1;
+            hours = hours - ((hours / 100) * 100);
         }
-        hours /= 10;
         if (startLcdView || hours / 10 != 0) {
             DisplayDataAddCharacter(hours / 10 + 48);
             startLcdView = 1;
+            hours = hours - ((hours / 10) * 10);
         }
-        hours /= 10;
         DisplayDataAddCharacter(hours + 48);
     }
     DisplayDataAddCharacter('.');
-
+    startLcdView = 0;
     if (decimalHour == 0) {
         DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
     } else {
         if (startLcdView || decimalHour / 1000 != 0) {
             DisplayDataAddCharacter(decimalHour / 1000 + 48);
             startLcdView = 1;
+            decimalHour = decimalHour - ((decimalHour / 1000) * 1000);
         }
-        decimalHour /= 10;
+        
         if (startLcdView || decimalHour / 100 != 0) {
             DisplayDataAddCharacter(decimalHour / 100 + 48);
             startLcdView = 1;
+            decimalHour = decimalHour - ((decimalHour / 100) * 100);
         }
-        decimalHour /= 10;
         if (startLcdView || decimalHour / 10 != 0) {
             DisplayDataAddCharacter(decimalHour / 10 + 48);
             startLcdView = 1;
+            decimalHour = decimalHour - ((decimalHour / 10) * 10);
         }
-        decimalHour /= 10;
+        
         DisplayDataAddCharacter(decimalHour + 48);
     }
 
@@ -388,7 +391,7 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
     DisplayDataAddCharacter(' ');
     DisplayDataAddCharacter(' ');
 
-    DisplayLoop(10);
+    DisplayLoop(30);
 }
 
 /*
@@ -427,24 +430,6 @@ int main(void) {
 
     
     //delayMs(10000);
-    
-    while(1)
-    {
-        DisplayDataSetRow(0);
-        unsigned char ary[] = {":-("};
-        DisplayDataAddString(ary, sizeof(":-)"));
-        
-        DisplayLoop(10);
-        
-        unsigned char a[] = {":-)"};
-        DisplayDataAddString(a, sizeof(":-("));
-        
-        DisplayLoop(10);
-        
-        delayMs(1000);
-        PORTAbits.RA2 = !PORTAbits.RA2;
-    }
-    
     int counter = 0;
     int hourCounter = 0;
     //    PORTBbits.RB15 = 0; //R/W always low for write CTL2
@@ -477,7 +462,7 @@ int main(void) {
             buttonFlag = 0;
             //            hourCounter = 3;
             //            counter = 7000;
-            hoursToAsciiDisplay(3, 952);   // I think it's a problem with ...
+            hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
             //            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
         }
