@@ -453,7 +453,7 @@ int main(void) {
 
  
     while (1) {
-        HeartBeat();
+        //HeartBeat();
         delayMs(500);
         DisplayLoop(10);
 
