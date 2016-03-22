@@ -136,25 +136,25 @@ void HeartBeat(void);
 
 
 
-#define DSP0_PORT           LATBbits.LATB12
-#define DSP1_PORT           LATBbits.LATB4 //LATAbits.LATA7     // pin 19 is on port a
-#define DSP2_PORT           LATAbits.LATA7 // pin 19 // LATBbits.LATB9
-#define DSP3_PORT           LATBbits.LATB5
-#define DSP4_PORT           LATBbits.LATB14
-#define DSP5_PORT           LATBbits.LATB2
-#define DSP6_PORT           LATBbits.LATB13
-#define DSP7_PORT           LATBbits.LATB3
+#define DSP0_PORT           LATBbits.LATB14
+#define DSP1_PORT           LATBbits.LATB2 //LATAbits.LATA7     // pin 19 is on port a
+#define DSP2_PORT           LATBbits.LATB13 // LATAbits.LATA7 // pin 19 //
+#define DSP3_PORT           LATBbits.LATB3
+#define DSP4_PORT           LATBbits.LATB12
+#define DSP5_PORT           LATAbits.LATA7 //LATBbits.LATB7
+#define DSP6_PORT           LATBbits.LATB9
+#define DSP7_PORT           LATBbits.LATB5
 
 // That may be fine, but i don't think so , for kicks and giggles lets try pin 19?
 
-#define DSP0_PORT_DIR       TRISBbits.TRISB12 //  LATBbits.RB14
-#define DSP1_PORT_DIR       TRISBbits.TRISB4 // TRISAbits.TRISA7 //    LATBbits.RB2
-#define DSP2_PORT_DIR       TRISAbits.TRISA7 // pin 19 // TRISBbits.TRISB9 //    LATBbits.RB13
-#define DSP3_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB3
-#define DSP4_PORT_DIR       TRISBbits.TRISB14 //    LATBbits.RB12
-#define DSP5_PORT_DIR       TRISBbits.TRISB2 //   LATBbits.RB4
-#define DSP6_PORT_DIR       TRISBbits.TRISB13 //    LATBbits.RB9
-#define DSP7_PORT_DIR       TRISBbits.TRISB3 //    LATBbits.RB5
+#define DSP0_PORT_DIR       TRISBbits.TRISB14 //  LATBbits.RB14
+#define DSP1_PORT_DIR       TRISBbits.TRISB2 // TRISAbits.TRISA7 //    LATBbits.RB2
+#define DSP2_PORT_DIR       TRISBbits.TRISB13 // TRISAbits.TRISA7 // pin 19 // TRISBbits.TRISB9 //    LATBbits.RB13
+#define DSP3_PORT_DIR       TRISBbits.TRISB3 //    LATBbits.RB3
+#define DSP4_PORT_DIR       TRISBbits.TRISB12 //    LATBbits.RB12
+#define DSP5_PORT_DIR       TRISAbits.TRISA7 //TRISBbits.TRISB7 //   LATBbits.RB4
+#define DSP6_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB9
+#define DSP7_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB5
 
 
 void initAdc(void); // forward declaration of init adc
@@ -400,28 +400,51 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
 
 int main(void) {
     initialization();
+    TRISAbits.TRISA2 = 0;
+    PORTAbits.RA2 = 1;
+
+//    DSP0_PORT = 1;
+//    DSP1_PORT = 1;
+//    DSP2_PORT = 1;
+//    DSP3_PORT = 1;
+//    DSP4_PORT = 1;
+//    DSP5_PORT = 1;
+//    DSP6_PORT = 1;
+//    DSP7_PORT = 1;
 
     DisplayInit();
-
-    DSP0_PORT = 1;
-    DSP1_PORT = 1;
-    DSP2_PORT = 1;
-    DSP3_PORT = 1;
-    DSP4_PORT = 1;
-    DSP5_PORT = 1;
-    DSP6_PORT = 1;
-    DSP7_PORT = 1;
-
-    DisplayInit();
-
+   //DisplayLoop(10);
+   delayMs(1000);
+ 
     DisplayDataSetRow(0);
-    unsigned char aryPtr[] = "";
-    DisplayDataAddString(aryPtr, sizeof (""));
-    DisplayLoop(10);
-    DisplayLoop(10);
-    DisplayLoop(10);
+        unsigned char aryPtr[] = ":-)";
+        DisplayDataAddString(aryPtr, sizeof (":-)"));
+
+        DisplayDataAddCharacter( 0xFF);
+        
+
     DisplayLoop(10);
 
+    
+    //delayMs(10000);
+    
+    while(1)
+    {
+        DisplayDataSetRow(0);
+        unsigned char ary[] = {":-("};
+        DisplayDataAddString(ary, sizeof(":-)"));
+        
+        DisplayLoop(10);
+        
+        unsigned char a[] = {":-)"};
+        DisplayDataAddString(a, sizeof(":-("));
+        
+        DisplayLoop(10);
+        
+        delayMs(1000);
+        PORTAbits.RA2 = !PORTAbits.RA2;
+    }
+    
     int counter = 0;
     int hourCounter = 0;
     //    PORTBbits.RB15 = 0; //R/W always low for write CTL2
@@ -454,7 +477,7 @@ int main(void) {
             buttonFlag = 0;
             //            hourCounter = 3;
             //            counter = 7000;
-            hoursToAsciiDisplay(3, 952);
+            hoursToAsciiDisplay(3, 952);   // I think it's a problem with ...
             //            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
         }
