@@ -41,6 +41,7 @@ void initSleep(void)
     RCFGCAL  = 0x2200;
     RTCPWC   = 0x0400;
     ALCFGRPTbits.CHIME = 0;
+    RCFGCALbits.RTCEN = 1;
     
     IFS3bits.RTCIF = 0;
     IEC3bits.RTCIE = 1;
