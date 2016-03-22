@@ -35,6 +35,9 @@
 
 void delayMs(int ms);
 
+void initSleep(void);
+void sleepMs(int ms);
+
 
 #endif	/* UTILITIES_H__ */
 

@@ -27,3 +27,13 @@ void delayMs(int ms) {
         ms--;
     }
 }
+
+void initSleep(void)
+{
+    
+}
+
+void sleepms(int ms)
+{
+    
+}
