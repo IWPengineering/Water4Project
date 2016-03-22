@@ -38,6 +38,8 @@ void delayMs(int ms);
 void initSleep(void);
 void sleepMs(int ms);
 
+void resetCheckRemedy(void);
+
 
 #endif	/* UTILITIES_H__ */
 

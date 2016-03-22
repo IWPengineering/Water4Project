@@ -37,3 +37,61 @@ void sleepms(int ms)
 {
     
 }
+
+void resetCheckRemedy(void)
+{
+    if(_TRAPR)
+    {
+        
+    }
+    
+    if(_IOPUWR)
+    {
+        
+    }
+
+    if(_DPSLP)
+    {
+        
+    }
+    
+    if(RCONbits.CM)
+    {
+        
+    }
+    
+    if(_EXTR)
+    {
+        
+    }
+    
+    if(_SWR)
+    {
+        
+    }
+    
+    if(_WDTO)
+    {
+        
+    }
+    
+    if(_SLEEP)
+    {
+        
+    }
+    
+    if(_IDLE)
+    {
+        
+    }
+    
+    if(_BOR)
+    {
+        
+    }
+    
+    if(_POR)
+    {
+        
+    }
+}
