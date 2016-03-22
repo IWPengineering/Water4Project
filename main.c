@@ -87,7 +87,7 @@ static volatile int buttonFlag = 0; // alerts us that the button has been pushed
 
 //#define DISPLAY_LOOP_COUNT 5
 
-#define DISPLAY_COMMAND_FUNCTION_SET 0b00111001
+#define DISPLAY_COMMAND_FUNCTION_SET 0x34//0b00111001
 #define DISPLAY_COMMAND_OFF 0b00001000
 #define DISPLAY_COMMAND_CLEAR 0b00000001
 #define DISPLAY_COMMAND_ENTRY 0b00000110
@@ -328,7 +328,7 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) {
 void hoursToAsciiDisplay(int hours, int decimalHour) {
     int startLcdView = 0;
 
-    DisplayDataSetRow(1);
+    //DisplayDataSetRow(0);
     unsigned char aryPtr[] = "Hours: ";
     DisplayDataAddString(aryPtr, sizeof ("Hours: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
@@ -473,6 +473,8 @@ int main(void) {
             //            hourCounter = 3;
             //            counter = 7000;
             //hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
+            dspDisplaySend(sendCommand, 0x01);
+            delayMs(10);
             hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
             delayMs(500);
         }
@@ -602,14 +604,41 @@ void dspDisplayInit(void) {
     DSP5_PORT_DIR = 0b0;
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
-
+    delayMs(100);
+    dspDisplayDataAddOne(sendCommand, 0x30);
+    DisplayLoop(1);
+    delayMs(100);
+    dspDisplayDataAddOne(sendCommand, 0x30);
+    DisplayLoop(1);
+    delayMs(100);
+    dspDisplayDataAddOne(sendCommand, 0x30);
+    DisplayLoop(1);
+    delayMs(100);
+    /*
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
+    DisplayLoop(1);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
+    DisplayLoop(1);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
+    DisplayLoop(1);
+    dspDisplayDataAddOne(sendCommand, 0x10);
+    DisplayLoop(1);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ENTRY);
+    DisplayLoop(1);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
+    DisplayLoop(1);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ON);
-
+    DisplayLoop(1);
+    */
+    dspDisplayDataAddOne(sendCommand, 0x38);
+    DisplayLoop(1);
+    dspDisplayDataAddOne(sendCommand, 0x10);
+    DisplayLoop(1);
+    dspDisplayDataAddOne(sendCommand, 0x0C);
+    DisplayLoop(1);
+    dspDisplayDataAddOne(sendCommand, 0x06);
+    DisplayLoop(1);
+    
     return;
 }
 
@@ -755,7 +784,6 @@ void dspDisplayDataAddInteger(int in) {
 void dspDisplayLoop(int count) {
     // reading busy flag does not work correctly right now
     // need to check it out
-
     for (int i = 0; i < count; i++) {
         //if ( IsDisplayBusy ( ) == 0 )
         {
