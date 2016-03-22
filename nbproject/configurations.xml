@@ -17,6 +17,7 @@
       <itemPath>display.h</itemPath>
       <itemPath>utilities.c</itemPath>
       <itemPath>utilities.h</itemPath>
+      <itemPath>test.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

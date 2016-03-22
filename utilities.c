@@ -28,12 +28,29 @@ void delayMs(int ms) {
     }
 }
 
-void initSleep(void)
+void __attribute__ ((interrupt, auto_psv)) _RTCCInterrupt(void)
 {
-    
+    _RTCIF = 0; // Clear the interrupt flag
+    // Go back to wherever we were executing from - the goal here is
+    //  just to sleep for some time
 }
 
-void sleepms(int ms)
+void initSleep(void)
 {
+    RCFGCALbits.RTCWREN = 1; // enable writing to the RTCC control registers
+    RCFGCAL  = 0x2200;
+    RTCPWC   = 0x0400;
+    ALCFGRPTbits.CHIME = 0;
     
+    IFS3bits.RTCIF = 0;
+    IEC3bits.RTCIE = 1;
+}
+
+void sleepms(sleepLength_t length)
+{
+    ALCFGRPTbits.AMASK = length;
+    ALCFGRPTbits.ALRMEN = 1;
+    
+    // Go to sleep
+    Sleep();
 }

@@ -35,8 +35,29 @@
 
 void delayMs(int ms);
 
+typedef enum 
+{
+            HALF_SECOND = 0b0000,
+            ONE_SECOND  = 0b0001,
+            TEN_SECOND  = 0b0010,
+            ONE_MINUTE  = 0b0011,
+            TEN_MINUTE  = 0b0100,
+            ONE_HOUR    = 0b0101,
+            ONE_DAY     = 0b0110,
+            ONE_WEEK    = 0b0111,
+            ONE_MONTH   = 0b1000,
+            ONE_YEAR    = 0b1001
+} sleepLength_t;
+/**
+ * void initSleep(void)
+ * 
+ * This function call inits the sleep mode for the PIC.
+ * This will be used in future sleepMs calls
+ * 
+ * This function uses the RTCC.
+ */
 void initSleep(void);
-void sleepMs(int ms);
+void sleepMs(sleepLength_t length);
 
 
 #endif	/* UTILITIES_H__ */
