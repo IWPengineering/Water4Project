@@ -57,6 +57,15 @@ typedef enum
  * This function uses the RTCC.
  */
 void initSleep(void);
+
+/**
+ * void sleepms(sleepLength_t length)
+ * 
+ * @param length - enum which represents length of sleep
+ * 
+ * This function puts the device to sleep for the specified period.
+ * This function uses the RTCC Alarm
+ */
 void sleepMs(sleepLength_t length);
 
 /**
