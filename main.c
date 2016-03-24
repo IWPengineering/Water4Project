@@ -61,13 +61,6 @@
 const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
 
-
-
-
-
-
-
-
 void initAdc(void); // forward declaration of init adc
 
 /*********************************************************************
@@ -79,26 +72,16 @@ void initAdc(void); // forward declaration of init adc
  * TestDate: 06-03-14
  ********************************************************************/
 void initialization(void) {
-    ////------------Sets up all ports as digial inputs-----------------------
     //IO port control
     ANSA = 0; // Make PORTA digital I/O
     TRISA = 0xFFFF; // Make PORTA all inputs
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
-    //TRISB = 0xFFFF; // Sets all of port B to input
     TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
-
-
 
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
     T1CONbits.TON = 1; // Enable the timer (timer 1 is used for the water sensor)
-
-    // UART config
-    U1BRG = 51; // Set baud to 9600, FCY = 8MHz (#pragma config FNOSC = FRC)
-    U1STA = 0;
-    U1MODE = 0x8000; //enable UART for 8 bit data//no parity, 1 stop bit
-    U1STAbits.UTXEN = 1; //enable transmit
 
     //H2O sensor config
     // WPS_ON/OFF pin 2
@@ -122,20 +105,29 @@ void initialization(void) {
 int readWaterSensor(void) // RB5 is one water sensor
 {
     // WPS_OUT - pin14
-    if (PORTBbits.RB8) {
-        while (PORTBbits.RB8) {
+    if (PORTBbits.RB8) 
+    {
+        while (PORTBbits.RB8) 
+        {
         }; //make sure you start at the beginning of the positive pulse
     }
-    while (!PORTBbits.RB8) {
+    
+    while (!PORTBbits.RB8) 
+    {
     }; //wait for rising edge
-    int prevICTime = TMR1; //get time at start of positive pulse
-    while (PORTBbits.RB8) {
+    
+    uint32_t prevICTime = TMR1; //get time at start of positive pulse
+    while (PORTBbits.RB8) 
+    {
     };
-    int currentICTime = TMR1; //get time at end of positive pulse
-    long pulseWidth = 0;
-    if (currentICTime >= prevICTime) {
+    uint32_t currentICTime = TMR1; //get time at end of positive pulse
+    uint32_t pulseWidth = 0;
+    if (currentICTime >= prevICTime) 
+    {
         pulseWidth = (currentICTime - prevICTime);
-    } else {
+    } 
+    else 
+    {
         pulseWidth = (currentICTime - prevICTime + 0x100000000);
     }
     //Check if this value is right
@@ -150,7 +142,8 @@ int readWaterSensor(void) // RB5 is one water sensor
  * Note: Pic Dependent
  * TestDate: 06-02-2014
  ********************************************************************/
-void initAdc(void) {
+void initAdc(void) 
+{
     // 10bit conversion
     AD1CON1 = 0; // Default to all 0s
     AD1CON1bits.ADON = 0; // Ensure the ADC is turned off before configuration
@@ -187,7 +180,8 @@ void initAdc(void) {
  ********************************************************************/
 int readAdc(int channel) //check with accelerometer
 {
-    switch (channel) {
+    switch (channel) 
+    {
         case 4:
             ANSBbits.ANSB2 = 1; // AN4 is analog
             TRISBbits.TRISB2 = 1; // AN4 is an input
@@ -196,223 +190,157 @@ int readAdc(int channel) //check with accelerometer
     }
     AD1CON1bits.ADON = 1; // Turn on ADC
     AD1CON1bits.SAMP = 1;
-    while (!AD1CON1bits.DONE) {
+    while (!AD1CON1bits.DONE) 
+    {
     }
+    // Turn off the ADC, to conserve power
+    AD1CON1bits.ADON = 0;
     return ADC1BUF0;
 }
 
-void __attribute__((__interrupt__, __auto_psv__)) _DefaultInterrupt() { //Tested 06-05-2014
-
+void __attribute__((__interrupt__, __auto_psv__)) _DefaultInterrupt() 
+{ 
+    // We should never be here
 }
 
-void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) {
-    if (IFS1bits.CNIF && PORTBbits.RB6) { // if button pushed it goes high
-
-        buttonFlag = 1; // I have entered the ISR
-
-        IFS1bits.CNIF = 0;
+void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) 
+{
+    if (IFS1bits.CNIF && PORTBbits.RB6) 
+    { // If the button is pushed and we're in the right ISR
+        buttonFlag = 1;
     }
 
+    // Always reset the interrupt flag
     IFS1bits.CNIF = 0;
-
 }
 
-void hoursToAsciiDisplay(int hours, int decimalHour) {
+void hoursToAsciiDisplay(int hours, int decimalHour) 
+{
     int startLcdView = 0;
 
-    //DisplayDataSetRow(0);
-    unsigned char aryPtr[] = "Hours: ";
-    DisplayDataAddString(aryPtr, sizeof ("Hours: "));
+    unsigned char aryPtr[] = "H: ";
+    DisplayDataAddString(aryPtr, sizeof ("H: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
 
-    if (hours == 0) {
-        DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
-    } else {
-        if (startLcdView || (hours / 10000 != 0)) {
+    if (hours == 0) 
+    {
+        DisplayDataAddCharacter(48);
+    } 
+    else 
+    {
+        if (startLcdView || (hours / 10000 != 0)) 
+        {
             DisplayDataAddCharacter(hours / 10000 + 48);
             startLcdView = 1;
             hours = hours - ((hours / 10000) * 10000); // moving the decimal point - taking advantage of int rounding
         }
         
-        if (startLcdView || hours / 1000 != 0) {
+        if (startLcdView || hours / 1000 != 0) 
+        {
             DisplayDataAddCharacter(hours / 1000 + 48);
             startLcdView = 1;
             hours = hours - ((hours / 1000) * 1000);
         }
-        if (startLcdView || hours / 100 != 0) {
+        
+        if (startLcdView || hours / 100 != 0) 
+        {
             DisplayDataAddCharacter(hours / 100 + 48);
             startLcdView = 1;
             hours = hours - ((hours / 100) * 100);
         }
-        if (startLcdView || hours / 10 != 0) {
+        
+        if (startLcdView || hours / 10 != 0) 
+        {
             DisplayDataAddCharacter(hours / 10 + 48);
             startLcdView = 1;
             hours = hours - ((hours / 10) * 10);
         }
+        
         DisplayDataAddCharacter(hours + 48);
     }
+    
     DisplayDataAddCharacter('.');
     startLcdView = 0;
-    if (decimalHour == 0) {
-        DisplayDataAddCharacter(48); //        sendData(48); // send 0 as the number of hours
-    } else {
-//        if (startLcdView || decimalHour / 1000 != 0) {
-//            DisplayDataAddCharacter(decimalHour / 1000 + 48);
-//            startLcdView = 1;
-//            decimalHour = decimalHour - ((decimalHour / 1000) * 1000);
-//        }
-//        else {
-//            DisplayDataAddCharacter(48);
-//        }
-        
-        if (startLcdView || decimalHour / 100 != 0) {
+    
+    if (decimalHour == 0) 
+    {
+        DisplayDataAddCharacter(48);
+    } 
+    else 
+    {   
+        if (startLcdView || decimalHour / 100 != 0) 
+        {
             DisplayDataAddCharacter(decimalHour / 100 + 48);
             startLcdView = 1;
             decimalHour = decimalHour - ((decimalHour / 100) * 100);
         }
-        else{
+        else
+        {
             DisplayDataAddCharacter(48);
         }
-        if (startLcdView || decimalHour / 10 != 0) {
+        
+        if (startLcdView || decimalHour / 10 != 0) 
+        {
             DisplayDataAddCharacter(decimalHour / 10 + 48);
             startLcdView = 1;
             decimalHour = decimalHour - ((decimalHour / 10) * 10);
         }
-        else{
+        else
+        {
             DisplayDataAddCharacter(48);
         }
         
         DisplayDataAddCharacter(decimalHour + 48);
     }
 
-
-    DisplayDataAddCharacter(' ');
-    DisplayDataAddCharacter(' ');
-    DisplayDataAddCharacter(' ');
-    DisplayDataAddCharacter(' ');
-    DisplayDataAddCharacter(' ');
-
-    DisplayLoop(30, true);
+    DisplayLoop(15, true);
 }
 
-/*
- * 
- */
 #define delayTime       500
 #define msHr            (uint32_t)3600000
 #define hourTicks       msHr / delayTime
 
-int main(void) {
+int main(void)
+{   
+    resetCheckRemedy();
+    
     initialization();
+    
+    // This is the LED port pin
     TRISAbits.TRISA2 = 0;
     PORTAbits.RA2 = 0;
 
-//    DSP0_PORT = 1;
-//    DSP1_PORT = 1;
-//    DSP2_PORT = 1;
-//    DSP3_PORT = 1;
-//    DSP4_PORT = 1;
-//    DSP5_PORT = 1;
-//    DSP6_PORT = 1;
-//    DSP7_PORT = 1;
-
     DisplayInit();
-   //DisplayLoop(10);
-   delayMs(1000);
- 
-        unsigned char aryPtr[] = ":-)";
-        DisplayDataAddString(aryPtr, sizeof (":-)"));
-
-        DisplayDataAddCharacter( 0xFF);
-        
-
-    DisplayLoop(10, true);
-
     
-    //delayMs(10000);
-    int counter = 0;
-    int hourCounter = 0;
-    //    PORTBbits.RB15 = 0; //R/W always low for write CTL2
-
-    // There's a chance that our numbers aren't ASCII
-    //sendData('h');   //H
-    //            sendData(0x65);   //E
-    //            sendData(0x6C);   //L
-    //            sendData(0x6C);   //L
-    //            sendData(0x6F);   //0
-
-
+    uint16_t tickCounter = 0;
+    uint16_t hourCounter = 0;
  
-    while (1) {
-        //HeartBeat();
-        delayMs(500);
-        DisplayLoop(10, true);
+    while (1) 
+    {
+        delayMs(delayTime);
 
-        //        delayMs(delayTime);
-        // is there water?
-        if (readWaterSensor()) {
-            counter++; // increments every half a second
+        if (readWaterSensor())
+        {
+            tickCounter++;
 
-            if (counter >= hourTicks) { // 7200 counter has reached 1 hour's worth
+            if (tickCounter >= hourTicks) 
+            {
                 hourCounter++;
-                counter = 0;
+                tickCounter = 0;
             }
         }
 
-        if (buttonFlag) {
+        if (buttonFlag) 
+        { // If someone pushed the button
             buttonFlag = 0;
-            //            hourCounter = 3;
-            //            counter = 7000;
-            //hoursToAsciiDisplay(31236, 952);   // I think it's a problem with ...
-            delayMs(10);
-            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
+            
+            hoursToAsciiDisplay(hourCounter, // hour part
+                    (tickCounter / (hourTicks / 1000))); // decimal hour part
             delayMs(500);
+            
+            // We should clear/turn off display here
         }
     }
 
     return -1;
 }
-
-//#define DSP0_PORT           14
-//#define DSP1_PORT           2
-//#define DSP2_PORT           13
-//#define DSP3_PORT           3
-//#define DSP4_PORT           12
-//#define DSP5_PORT           4
-//#define DSP6_PORT           9
-//#define DSP7_PORT           5
-//
-//    PORTBbits.RB0 = 0;                 //low for command CTL1    
-//    PORTBbits.RB1  = 0b1; // E
-//    
-//    PORTBbits.RB14 = (command & 0x01) >> 0;
-//    PORTBbits.RB2  = (command & 0x02) >> 1;
-//    PORTBbits.RB13 = (command & 0x04) >> 2;
-//    PORTBbits.RB3  = (command & 0x08) >> 3;
-//    PORTBbits.RB12 = (command & 0x10) >> 4;
-//    PORTBbits.RB4  = (command & 0x20) >> 5;
-//    PORTBbits.RB9  = (command & 0x40) >> 6;
-//    PORTBbits.RB5  = (command & 0x80) >> 7;
-
-
-
-
-
-/*
-unsigned char IsDisplayBusy ( void )
-{
-    unsigned char isBusy;
-
-    DISPLAY_DATA_DIR_BUSY_FLAG = 0b1;
-//    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b1;
-    isBusy = DISPLAY_BIT_BUSY_FLAG;
-//    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0b0;
-    DISPLAY_DATA_DIR_BUSY_FLAG = 0b0;
-
-    return (isBusy );
-
-}
-
- */
-
-

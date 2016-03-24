@@ -59,6 +59,16 @@ typedef enum
 void initSleep(void);
 void sleepMs(sleepLength_t length);
 
+/**
+ * This function checks every possible reset condition, individually.
+ * It isolates each possibility to its own if() statement, where it can
+ *  be handled.
+ * 
+ * As of 3/24, this function just clears the reset bits, it doesn't handle
+ *  any specific implementation. This should be fixed later.
+ */
+void resetCheckRemedy(void);
+
 
 #endif	/* UTILITIES_H__ */
 
