@@ -77,10 +77,10 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200               0x28a           0x3cf  (975)
 .const                       0x48a                 0x2             0x3  (3)
-.text                        0x48c               0x686           0x9c9  (2505)
-.dinit                       0xb12                 0xe            0x15  (21)
+.text                        0x48c               0x6c8           0xa2c  (2604)
+.dinit                       0xb54                 0xe            0x15  (21)
 
-                     Total program memory used (bytes):          0xdb0  (3504) 10%
+                     Total program memory used (bytes):          0xe13  (3603) 10%
 
 
 Data Memory  [Origin = 0x800, Length = 0x800]
@@ -142,24 +142,23 @@ External Symbols in Program Memory (by address):
                   0x0005b8                  __CNInterrupt
                   0x0005e4                  _hoursToAsciiDisplay
                   0x00078e                  _main
-                  0x00080c                  _DisplayInit
-                  0x000814                  _DisplayLoop
-                  0x00083e                  _DisplayDataAddString
-                  0x00084e                  _DisplayDataAddCharacter
-                  0x000a9e                  _delayMs
-                  0x000ac4                  __RTCCInterrupt
-                  0x000ad8                  _initSleep
-                  0x000af0                  _sleepMs
+                  0x00080e                  _DisplayInit
+                  0x000816                  _DisplayLoop
+                  0x000840                  _DisplayDataAddString
+                  0x000850                  _DisplayDataAddCharacter
+                  0x000aa0                  _delayMs
+                  0x000ac6                  _initSleep
+                  0x000acc                  _sleepms
+                  0x000ad4                  _resetCheckRemedy
 
 External Symbols in Program Memory (by name):
 
-                  0x00084e                  _DisplayDataAddCharacter
-                  0x00083e                  _DisplayDataAddString
-                  0x00080c                  _DisplayInit
-                  0x000814                  _DisplayLoop
+                  0x000850                  _DisplayDataAddCharacter
+                  0x000840                  _DisplayDataAddString
+                  0x00080e                  _DisplayInit
+                  0x000816                  _DisplayLoop
                   0x0005b8                  __CNInterrupt
                   0x0005a6                  __DefaultInterrupt
-                  0x000ac4                  __RTCCInterrupt
                   0x00029a                  ___divsf3
                   0x00031e                  ___fixsfsi
                   0x00040c                  ___floatdisf
@@ -175,16 +174,17 @@ External Symbols in Program Memory (by name):
                   0x0003dc                  __funpack2
                   0x00022c                  __psv_init
                   0x000200                  __resetPRI
-                  0x000a9e                  _delayMs
+                  0x000aa0                  _delayMs
                   0x0005e4                  _hoursToAsciiDisplay
                   0x000530                  _initAdc
-                  0x000ad8                  _initSleep
+                  0x000ac6                  _initSleep
                   0x00048c                  _initialization
                   0x00078e                  _main
                   0x00048a                  _pulseWidthThreshold
                   0x000578                  _readAdc
                   0x0004c0                  _readWaterSensor
-                  0x000af0                  _sleepMs
+                  0x000ad4                  _resetCheckRemedy
+                  0x000acc                  _sleepms
 
 Memory Configuration
 
@@ -312,24 +312,24 @@ __FDS
 .comment
  *(.comment)
 
-.debug_info       0x000000       0x26ba
+.debug_info       0x000000       0x22ae
  *(.debug_info)
  .debug_info      0x000000       0x16d2 build/default/production/main.o
  .debug_info      0x0016d2        0x8cf build/default/production/display.o
- .debug_info      0x001fa1        0x719 build/default/production/utilities.o
+ .debug_info      0x001fa1        0x30d build/default/production/utilities.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000        0x442
+.debug_abbrev     0x000000        0x40e
  *(.debug_abbrev)
  .debug_abbrev    0x000000        0x1ad build/default/production/main.o
  .debug_abbrev    0x0001ad        0x185 build/default/production/display.o
- .debug_abbrev    0x000332        0x110 build/default/production/utilities.o
+ .debug_abbrev    0x000332         0xdc build/default/production/utilities.o
 
-.debug_line       0x000000        0xac9
+.debug_line       0x000000        0xb1a
  *(.debug_line)
- .debug_line      0x000000        0x56d build/default/production/main.o
- .debug_line      0x00056d        0x3c5 build/default/production/display.o
- .debug_line      0x000932        0x197 build/default/production/utilities.o
+ .debug_line      0x000000        0x575 build/default/production/main.o
+ .debug_line      0x000575        0x3c5 build/default/production/display.o
+ .debug_line      0x00093a        0x1e0 build/default/production/utilities.o
 
 .debug_frame      0x000000        0x18c
  *(.debug_frame)
@@ -337,11 +337,11 @@ __FDS
  .debug_frame     0x000094         0xa4 build/default/production/display.o
  .debug_frame     0x000138         0x54 build/default/production/utilities.o
 
-.debug_str        0x000000        0x137
+.debug_str        0x000000        0x115
  *(.debug_str)
  .debug_str       0x000000         0xa1 build/default/production/main.o
  .debug_str       0x0000a1         0x6b build/default/production/display.o
- .debug_str       0x00010c         0x2b build/default/production/utilities.o
+ .debug_str       0x00010c          0x9 build/default/production/utilities.o
 
 .debug_loc
  *(.debug_loc)
@@ -350,14 +350,14 @@ __FDS
  *(.debug_macinfo)
 
 .debug_pubnames
-                  0x000000        0x1cb
+                  0x000000        0x1cd
  *(.debug_pubnames)
  .debug_pubnames
                   0x000000         0xb1 build/default/production/main.o
  .debug_pubnames
                   0x0000b1         0xcf build/default/production/display.o
  .debug_pubnames
-                  0x000180         0x4b build/default/production/utilities.o
+                  0x000180         0x4d build/default/production/utilities.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -442,7 +442,7 @@ __FDS
                   0x00008a          0x4 LONG 0x5a6 DEFINED (__Interrupt59)?ABSOLUTE (__Interrupt59):ABSOLUTE (__DefaultInterrupt)
                   0x00008c          0x4 LONG 0x5a6 DEFINED (__Interrupt60)?ABSOLUTE (__Interrupt60):ABSOLUTE (__DefaultInterrupt)
                   0x00008e          0x4 LONG 0x5a6 DEFINED (__Interrupt61)?ABSOLUTE (__Interrupt61):ABSOLUTE (__DefaultInterrupt)
-                  0x000090          0x4 LONG 0xac4 DEFINED (__RTCCInterrupt)?ABSOLUTE (__RTCCInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000090          0x4 LONG 0x5a6 DEFINED (__RTCCInterrupt)?ABSOLUTE (__RTCCInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000092          0x4 LONG 0x5a6 DEFINED (__Interrupt63)?ABSOLUTE (__Interrupt63):ABSOLUTE (__DefaultInterrupt)
                   0x000094          0x4 LONG 0x5a6 DEFINED (__Interrupt64)?ABSOLUTE (__Interrupt64):ABSOLUTE (__DefaultInterrupt)
                   0x000096          0x4 LONG 0x5a6 DEFINED (__U1ErrInterrupt)?ABSOLUTE (__U1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
@@ -570,7 +570,7 @@ __FDS
                   0x00018a          0x4 LONG 0x5a6 DEFINED (__AltInterrupt59)?ABSOLUTE (__AltInterrupt59):DEFINED (__Interrupt59)?ABSOLUTE (__Interrupt59):ABSOLUTE (__DefaultInterrupt)
                   0x00018c          0x4 LONG 0x5a6 DEFINED (__AltInterrupt60)?ABSOLUTE (__AltInterrupt60):DEFINED (__Interrupt60)?ABSOLUTE (__Interrupt60):ABSOLUTE (__DefaultInterrupt)
                   0x00018e          0x4 LONG 0x5a6 DEFINED (__AltInterrupt61)?ABSOLUTE (__AltInterrupt61):DEFINED (__Interrupt61)?ABSOLUTE (__Interrupt61):ABSOLUTE (__DefaultInterrupt)
-                  0x000190          0x4 LONG 0xac4 DEFINED (__AltRTCCInterrupt)?ABSOLUTE (__AltRTCCInterrupt):DEFINED (__RTCCInterrupt)?ABSOLUTE (__RTCCInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000190          0x4 LONG 0x5a6 DEFINED (__AltRTCCInterrupt)?ABSOLUTE (__AltRTCCInterrupt):DEFINED (__RTCCInterrupt)?ABSOLUTE (__RTCCInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000192          0x4 LONG 0x5a6 DEFINED (__AltInterrupt63)?ABSOLUTE (__AltInterrupt63):DEFINED (__Interrupt63)?ABSOLUTE (__Interrupt63):ABSOLUTE (__DefaultInterrupt)
                   0x000194          0x4 LONG 0x5a6 DEFINED (__AltInterrupt64)?ABSOLUTE (__AltInterrupt64):DEFINED (__Interrupt64)?ABSOLUTE (__Interrupt64):ABSOLUTE (__DefaultInterrupt)
                   0x000196          0x4 LONG 0x5a6 DEFINED (__AltU1ErrInterrupt)?ABSOLUTE (__AltU1ErrInterrupt):DEFINED (__U1ErrInterrupt)?ABSOLUTE (__U1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
@@ -1244,44 +1244,44 @@ OUTPUT(dist/default/production/Water4Project.production.elf elf32-pic30)
 LOAD data_init
 
 .debug_pubtypes
-                  0x000048        0x30b
+                  0x000048        0x294
  .debug_pubtypes
                   0x000048        0x1b6 build/default/production/main.o
  .debug_pubtypes
                   0x0001fe         0xaf build/default/production/display.o
  .debug_pubtypes
-                  0x0002ad         0xa6 build/default/production/utilities.o
+                  0x0002ad         0x2f build/default/production/utilities.o
 
 __c30_signature
-                  0x000353         0x54
+                  0x0002dc         0x54
  __c30_signature
-                  0x000353          0x6 build/default/production/main.o
+                  0x0002dc          0x6 build/default/production/main.o
  __c30_signature
-                  0x000359          0x6 build/default/production/display.o
+                  0x0002e2          0x6 build/default/production/display.o
  __c30_signature
-                  0x00035f          0x6 build/default/production/utilities.o
+                  0x0002e8          0x6 build/default/production/utilities.o
  __c30_signature
-                  0x000365          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
+                  0x0002ee          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
  __c30_signature
-                  0x00036b          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\liblega-pic30-elf.a(data_init_standard.o)
+                  0x0002f4          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\liblega-pic30-elf.a(data_init_standard.o)
  __c30_signature
-                  0x000371          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(divsf3.eo)
+                  0x0002fa          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(divsf3.eo)
  __c30_signature
-                  0x000377          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(fixsfsi.eo)
+                  0x000300          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(fixsfsi.eo)
  __c30_signature
-                  0x00037d          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatsisf.eo)
+                  0x000306          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatsisf.eo)
  __c30_signature
-                  0x000383          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(fpack.eo)
+                  0x00030c          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(fpack.eo)
  __c30_signature
-                  0x000389          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(funpack.eo)
+                  0x000312          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(funpack.eo)
  __c30_signature
-                  0x00038f          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(funpack2.eo)
+                  0x000318          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(funpack2.eo)
  __c30_signature
-                  0x000395          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(futil.eo)
+                  0x00031e          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(futil.eo)
  __c30_signature
-                  0x00039b          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatdisf.eo)
+                  0x000324          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatdisf.eo)
  __c30_signature
-                  0x0003a1          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
+                  0x00032a          0x6 c:/program files (x86)/microchip/xc16/v1.25/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
 
 .nbss               0x0800        0x132
  .nbss              0x0800        0x130 build/default/production/display.o
@@ -1322,8 +1322,8 @@ __c30_signature
  .const             0x848a          0x2 build/default/production/main.o
                     0x848a                  _pulseWidthThreshold
 
-.text             0x00048c        0x686
- .text            0x00048c        0x380 build/default/production/main.o
+.text             0x00048c        0x6c8
+ .text            0x00048c        0x382 build/default/production/main.o
                   0x00048c                  _initialization
                   0x0004c0                  _readWaterSensor
                   0x000530                  _initAdc
@@ -1332,16 +1332,16 @@ __c30_signature
                   0x0005b8                  __CNInterrupt
                   0x0005e4                  _hoursToAsciiDisplay
                   0x00078e                  _main
- .text            0x00080c        0x292 build/default/production/display.o
-                  0x00080c                  _DisplayInit
-                  0x000814                  _DisplayLoop
-                  0x00083e                  _DisplayDataAddString
-                  0x00084e                  _DisplayDataAddCharacter
- .text            0x000a9e         0x74 build/default/production/utilities.o
-                  0x000a9e                  _delayMs
-                  0x000ac4                  __RTCCInterrupt
-                  0x000ad8                  _initSleep
-                  0x000af0                  _sleepMs
+ .text            0x00080e        0x292 build/default/production/display.o
+                  0x00080e                  _DisplayInit
+                  0x000816                  _DisplayLoop
+                  0x000840                  _DisplayDataAddString
+                  0x000850                  _DisplayDataAddCharacter
+ .text            0x000aa0         0xb4 build/default/production/utilities.o
+                  0x000aa0                  _delayMs
+                  0x000ac6                  _initSleep
+                  0x000acc                  _sleepms
+                  0x000ad4                  _resetCheckRemedy
 
-.dinit            0x000b12          0xe
- .dinit           0x000b12          0xe data_init
+.dinit            0x000b54          0xe
+ .dinit           0x000b54          0xe data_init
