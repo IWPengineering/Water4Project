@@ -14,14 +14,17 @@
  * Input: milliseconds
  * Output: None
  * Overview: Delays the specified number of milliseconds
- * Note: Depends on Clock speed. Pic Dependent
+ * Note: Clock speed dependent
  * TestDate: 05-20-14
  ********************************************************************/
-void delayMs(int ms) {
-    int myIndex;
-    while (ms > 0) {
+void delayMs(volatile int ms) 
+{
+    volatile int myIndex;
+    while (ms > 0) 
+    {
         myIndex = 0;
-        while (myIndex < 667) {
+        while (myIndex < 667) 
+        {
             myIndex++;
         }
         ms--;
