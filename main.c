@@ -312,7 +312,7 @@ int main(void)
 
     DisplayInit();
     
-    uint16_t counter = 0;
+    uint16_t tickCounter = 0;
     uint16_t hourCounter = 0;
  
     while (1) 
@@ -321,12 +321,12 @@ int main(void)
 
         if (readWaterSensor())
         {
-            counter++;
+            tickCounter++;
 
-            if (counter >= hourTicks) 
+            if (tickCounter >= hourTicks) 
             {
                 hourCounter++;
-                counter = 0;
+                tickCounter = 0;
             }
         }
 
@@ -334,7 +334,8 @@ int main(void)
         { // If someone pushed the button
             buttonFlag = 0;
             
-            hoursToAsciiDisplay(hourCounter, (counter / 7.2)); // divide by 7.2 to give us the decimal accuracy of 3 places, as an integer.
+            hoursToAsciiDisplay(hourCounter, // hour part
+                    (tickCounter / (hourTicks / 1000))); // decimal hour part
             delayMs(500);
             
             // We should clear/turn off display here
