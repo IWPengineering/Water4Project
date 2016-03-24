@@ -13,6 +13,7 @@
 #include <string.h>
 #include "display.h"
 #include "utilities.h"
+#include "nvm_controller.h"
 
 
 
