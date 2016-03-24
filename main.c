@@ -61,13 +61,6 @@
 const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
 
-
-
-
-
-
-
-
 void initAdc(void); // forward declaration of init adc
 
 /*********************************************************************
@@ -79,26 +72,16 @@ void initAdc(void); // forward declaration of init adc
  * TestDate: 06-03-14
  ********************************************************************/
 void initialization(void) {
-    ////------------Sets up all ports as digial inputs-----------------------
     //IO port control
     ANSA = 0; // Make PORTA digital I/O
     TRISA = 0xFFFF; // Make PORTA all inputs
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
-    //TRISB = 0xFFFF; // Sets all of port B to input
     TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
-
-
 
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
     T1CONbits.TON = 1; // Enable the timer (timer 1 is used for the water sensor)
-
-    // UART config
-    U1BRG = 51; // Set baud to 9600, FCY = 8MHz (#pragma config FNOSC = FRC)
-    U1STA = 0;
-    U1MODE = 0x8000; //enable UART for 8 bit data//no parity, 1 stop bit
-    U1STAbits.UTXEN = 1; //enable transmit
 
     //H2O sensor config
     // WPS_ON/OFF pin 2
@@ -122,20 +105,29 @@ void initialization(void) {
 int readWaterSensor(void) // RB5 is one water sensor
 {
     // WPS_OUT - pin14
-    if (PORTBbits.RB8) {
-        while (PORTBbits.RB8) {
+    if (PORTBbits.RB8) 
+    {
+        while (PORTBbits.RB8) 
+        {
         }; //make sure you start at the beginning of the positive pulse
     }
-    while (!PORTBbits.RB8) {
+    
+    while (!PORTBbits.RB8) 
+    {
     }; //wait for rising edge
-    int prevICTime = TMR1; //get time at start of positive pulse
-    while (PORTBbits.RB8) {
+    
+    uint32_t prevICTime = TMR1; //get time at start of positive pulse
+    while (PORTBbits.RB8) 
+    {
     };
-    int currentICTime = TMR1; //get time at end of positive pulse
-    long pulseWidth = 0;
-    if (currentICTime >= prevICTime) {
+    uint32_t currentICTime = TMR1; //get time at end of positive pulse
+    uint32_t pulseWidth = 0;
+    if (currentICTime >= prevICTime) 
+    {
         pulseWidth = (currentICTime - prevICTime);
-    } else {
+    } 
+    else 
+    {
         pulseWidth = (currentICTime - prevICTime + 0x100000000);
     }
     //Check if this value is right
@@ -150,7 +142,8 @@ int readWaterSensor(void) // RB5 is one water sensor
  * Note: Pic Dependent
  * TestDate: 06-02-2014
  ********************************************************************/
-void initAdc(void) {
+void initAdc(void) 
+{
     // 10bit conversion
     AD1CON1 = 0; // Default to all 0s
     AD1CON1bits.ADON = 0; // Ensure the ADC is turned off before configuration
@@ -302,7 +295,8 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
 #define msHr            (uint32_t)3600000
 #define hourTicks       msHr / delayTime
 
-int main(void) {
+int main(void)
+{
     
     resetCheckRemedy();
     
@@ -310,18 +304,9 @@ int main(void) {
     TRISAbits.TRISA2 = 0;
     PORTAbits.RA2 = 0;
 
-//    DSP0_PORT = 1;
-//    DSP1_PORT = 1;
-//    DSP2_PORT = 1;
-//    DSP3_PORT = 1;
-//    DSP4_PORT = 1;
-//    DSP5_PORT = 1;
-//    DSP6_PORT = 1;
-//    DSP7_PORT = 1;
-
     DisplayInit();
    //DisplayLoop(10);
-   delayMs(1000);
+    delayMs(1000);
  
         unsigned char aryPtr[] = ":-)";
         DisplayDataAddString(aryPtr, sizeof (":-)"));
