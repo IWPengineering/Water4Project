@@ -86,7 +86,7 @@ void initialization(void) {
     //H2O sensor config
     // WPS_ON/OFF pin 2
     TRISAbits.TRISA0 = 0; //makes water presence sensor pin an output.
-    PORTAbits.RA0 = 1; //turns on the water presnece sensor.
+    PORTAbits.RA0 = 1; //turns on the water presence sensor.
 
     CNEN2bits.CN24IE = 1; // enable interrupt for pin 15
     IEC1bits.CNIE = 1; // enable change notification interrupt
