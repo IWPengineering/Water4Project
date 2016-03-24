@@ -317,7 +317,7 @@ int main(void)
  
     while (1) 
     {
-        sleepMs(HALF_SECOND);
+        sleepForPeriod(HALF_SECOND);
 
         if (readWaterSensor())
         {
@@ -336,7 +336,7 @@ int main(void)
             
             hoursToAsciiDisplay(hourCounter, // hour part
                     (tickCounter / (hourTicks / 1000))); // decimal hour part
-            sleepMs(TEN_SECOND);
+            sleepForPeriod(TEN_SECOND);
             
             // We should clear/turn off display here
         }

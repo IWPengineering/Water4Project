@@ -66,7 +66,7 @@ void initSleep(void);
  * This function puts the device to sleep for the specified period.
  * This function uses the RTCC Alarm
  */
-void sleepMs(sleepLength_t length);
+void sleepForPeriod(sleepLength_t length);
 
 /**
  * This function checks every possible reset condition, individually.

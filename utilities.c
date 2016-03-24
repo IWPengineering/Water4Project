@@ -50,7 +50,7 @@ void initSleep(void)
     IEC3bits.RTCIE = 1;
 }
 
-void sleepMs(sleepLength_t length)
+void sleepForPeriod(sleepLength_t length)
 {
     ALCFGRPTbits.AMASK = length;
     ALCFGRPTbits.ALRMEN = 1;
