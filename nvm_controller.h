@@ -33,12 +33,18 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdint.h>
+#include <libpic30.h>
+
+#define NVM_ENABLED 1
+
+#if NVM_ENABLED == 1
 
 typedef uint16_t nvm_size_t;
 typedef uint16_t nvm_handle_t;
 typedef enum 
 {
-    
+    NVM_SUCCESS = 0,
+    NVM_FAILURE = 1
 } nvm_error_t;
 
 typedef struct 
@@ -108,6 +114,8 @@ nvm_error_t NvmBlockGet(nvm_handle_t *pSrc,
         nvm_size_t *pDest,
         nvm_size_t dataLen,
         nvm_size_t offset);
+
+#endif
 
 #endif	/* NVM_CONTROLLER_H__ */
 
