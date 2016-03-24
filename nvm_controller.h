@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <libpic30.h>
 
-#define NVM_ENABLED 1
+#define NVM_ENABLED 0
 
 #if NVM_ENABLED == 1
 
