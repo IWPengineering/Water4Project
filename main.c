@@ -303,6 +303,9 @@ void hoursToAsciiDisplay(int hours, int decimalHour) {
 #define hourTicks       msHr / delayTime
 
 int main(void) {
+    
+    resetCheckRemedy();
+    
     initialization();
     TRISAbits.TRISA2 = 0;
     PORTAbits.RA2 = 0;
