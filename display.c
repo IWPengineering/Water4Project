@@ -34,9 +34,10 @@ void DisplayInit(void) {
 void DisplayLoop(int count, bool resetCursor) {
     if(resetCursor)
     {
-        dspDisplaySend(sendCommand, 0x01);
+        dspDisplaySend(sendCommand, 0x02);
     }
-    for (int inx = 0; inx < count; inx++) {
+    int inx;
+    for (inx = 0; inx < count; inx++) {
         dspDisplayLoop(1);
     }
     return;
@@ -72,7 +73,8 @@ void dspDisplayInit(void) {
     DSP5_PORT_DIR = 0b0;
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
-    delayMs(100);
+    delayMs(1000);
+    /*
     dspDisplayDataAddOne(sendCommand, 0x30);
     DisplayLoop(1, false);
     delayMs(100);
@@ -89,6 +91,19 @@ void dspDisplayInit(void) {
     dspDisplayDataAddOne(sendCommand, 0x0C);
     DisplayLoop(1, false);
     dspDisplayDataAddOne(sendCommand, 0x06);
+    DisplayLoop(1, false);
+     * */
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ENTRY);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ON);
     DisplayLoop(1, false);
     
     return;
@@ -140,7 +155,8 @@ void dspDisplayDataAddOne(enum _DisplayCommand command, unsigned char data) {
 }
 
 void dspDisplayDataAddString(unsigned char *string, int size) {
-    for (unsigned char i = 0; i < size - 1; i++) {
+    unsigned char i;
+    for (i = 0; i < size - 1; i++) {
         dspDisplayDataAddOne(sendData, string[i]);
     }
 
@@ -150,7 +166,8 @@ void dspDisplayDataAddString(unsigned char *string, int size) {
 void dspDisplayLoop(int count) {
     // reading busy flag does not work correctly right now
     // need to check it out
-    for (int i = 0; i < count; i++) {
+    int i;
+    for (i = 0; i < count; i++) {
         //if ( IsDisplayBusy ( ) == 0 )
         {
             if (DisplayDataPositionRead < DisplayDataPositionWrite) {
@@ -166,5 +183,32 @@ void dspDisplayLoop(int count) {
         }
     }
 
+    return;
+}
+
+void DisplayDataSetRow(unsigned char row) 
+{
+    unsigned char rowValue;
+    switch (row) 
+    {
+        case 0:
+            rowValue = 0x00;
+            break;
+        case 1:
+            rowValue = 0x40;
+            break;
+        case 2:
+            rowValue = 0x14;
+            break;
+        case 3:
+            rowValue = 0x54;
+            break;
+        default:
+            rowValue = 0x00;
+            break;
+    }
+    
+    dspDisplayDataAddOne(setPosition, rowValue);
+    
     return;
 }
