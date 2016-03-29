@@ -219,7 +219,7 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void)
 void hoursToAsciiDisplay(int hours, int decimalHour) 
 {
     int startLcdView = 0;
-
+    DisplayTurnOff();
     unsigned char aryPtr[] = "H: ";
     DisplayDataAddString(aryPtr, sizeof ("H: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
@@ -303,8 +303,9 @@ const unsigned char countdownArray[] = { '5', '5', '4', '4', '3', '3', '2', '2',
 const unsigned char countdownResetArray[] = "Reset In ";
 static void DisplayCountdown(void)
 {
-    DisplayDataAddString((unsigned char *)countdownResetArray, sizeof(countdownResetArray));
-    DisplayDataAddCharacter(countdownArray[countdownPos++]);
+DisplayTurnOff();
+DisplayDataAddString((unsigned char *)&countdownResetArray, sizeof(countdownResetArray));    
+DisplayDataAddCharacter(countdownArray[countdownPos++]);
     DisplayLoop(15, true);
 }
 
@@ -332,7 +333,8 @@ int main(void)
  
     while (1) 
     {
-        sleepForPeriod(HALF_SECOND);
+        //sleepForPeriod(HALF_SECOND);
+delayMs(delayTime);
 
         if (readWaterSensor())
         {
@@ -358,13 +360,16 @@ int main(void)
                {
                    tickCounter = 0;
                    hourCounter = 0;
+                   isButtonTicking = false;
                }
             }
             else
             {
+                delayMs(5000);
                 isButtonTicking = false;
                 ResetDisplayCountdown();
                 DisplayTurnOff();
+                DisplayLoop(1, true);
             }
             
         }
