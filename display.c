@@ -198,5 +198,7 @@ void DisplayDataSetRow(unsigned char row)
 void DisplayTurnOff(void)
 {
     // Reset the cursor, this clears the screen
+    dspDisplaySend(sendCommand, 0x01);
+    delayMs(5);
     dspDisplaySend(sendCommand, 0x02);
 }

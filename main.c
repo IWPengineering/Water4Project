@@ -361,11 +361,13 @@ delayMs(delayTime);
                    tickCounter = 0;
                    hourCounter = 0;
                    isButtonTicking = false;
+                   ResetDisplayCountdown();
+                   DisplayTurnOff();
                }
             }
             else
             {
-                delayMs(5000);
+                
                 isButtonTicking = false;
                 ResetDisplayCountdown();
                 DisplayTurnOff();
