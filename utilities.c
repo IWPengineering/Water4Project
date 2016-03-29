@@ -46,6 +46,12 @@ void initSleep(void)
     ALCFGRPTbits.CHIME = 0;
     RCFGCALbits.RTCEN = 1;
     
+    /* Set interrupt priority to lowest available while still being enabled
+     Note: This is important! If the interrupt is of a higher or equal
+     priority to a CPU interrupt, then the device will generate either
+     a hard fault or address fault on wakeup from sleep.
+     */
+    _RTCIP = 0b001;
     IFS3bits.RTCIF = 0;
     IEC3bits.RTCIE = 1;
 }
