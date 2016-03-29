@@ -303,9 +303,9 @@ const unsigned char countdownArray[] = { '5', '5', '4', '4', '3', '3', '2', '2',
 const unsigned char countdownResetArray[] = "Reset In ";
 static void DisplayCountdown(void)
 {
-DisplayTurnOff();
-DisplayDataAddString((unsigned char *)&countdownResetArray, sizeof(countdownResetArray));    
-DisplayDataAddCharacter(countdownArray[countdownPos++]);
+    DisplayTurnOff();
+    DisplayDataAddString((unsigned char *)&countdownResetArray, sizeof(countdownResetArray));    
+    DisplayDataAddCharacter(countdownArray[countdownPos++]);
     DisplayLoop(15, true);
 }
 
@@ -334,8 +334,8 @@ int main(void)
  
     while (1) 
     {
-        //sleepForPeriod(HALF_SECOND);
-delayMs(delayTime);
+        sleepForPeriod(HALF_SECOND);
+        //delayMs(delayTime);
 
         if (readWaterSensor())
         {
