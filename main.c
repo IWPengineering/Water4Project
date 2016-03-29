@@ -77,7 +77,7 @@ void initialization(void) {
     TRISA = 0xFFFF; // Make PORTA all inputs
     ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
     TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
-
+    TRISBbits.TRISB4 = 1;
     // Timer control (for WPS)
     T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
     T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
@@ -307,8 +307,10 @@ int main(void)
     initialization();
     
     // This is the LED port pin
-    TRISAbits.TRISA2 = 0;
-    PORTAbits.RA2 = 1;
+    //TRISAbits.TRISA2 = 0;
+    //TRISAbits.TRISA1 = 0;
+    //PORTAbits.RA2 = 1;
+    //PORTAbits.RA1 = 1;
 
     DisplayInit();
     
@@ -319,9 +321,13 @@ int main(void)
     {
         delayMs(delayTime);
 
-        unsigned char ary[] = "Hello world.";
-        DisplayDataAddString(ary, sizeof("Hello world."));
-        DisplayLoop(10, true);
+        //unsigned char ary[] = "HelloHelloHelloHello";
+        //DisplayDataSetRow(0);
+        //DisplayDataAddString(ary, sizeof("HelloHelloHelloHello"));
+        //DisplayLoop(15, true);
+        
+        //PORTAbits.RA2 = !PORTAbits.RA2;
+        //PORTAbits.RA1 = !PORTAbits.RA1;
         
         //LATBbits.LATB1 = 
         //        !LATBbits.LATB1;

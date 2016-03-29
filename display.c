@@ -34,7 +34,7 @@ void DisplayInit(void) {
 void DisplayLoop(int count, bool resetCursor) {
     if(resetCursor)
     {
-        dspDisplaySend(sendCommand, 0x01);
+        dspDisplaySend(sendCommand, 0x02);
     }
     int inx;
     for (inx = 0; inx < count; inx++) {
@@ -73,7 +73,7 @@ void dspDisplayInit(void) {
     DSP5_PORT_DIR = 0b0;
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
-    delayMs(100);
+    delayMs(1000);
     /*
     dspDisplayDataAddOne(sendCommand, 0x30);
     DisplayLoop(1, false);
@@ -93,17 +93,17 @@ void dspDisplayInit(void) {
     dspDisplayDataAddOne(sendCommand, 0x06);
     DisplayLoop(1, false);
      * */
-    dspDisplayDataAddOne(sendCommand, 0x38);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
     DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x80);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
     DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x01);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_CLEAR);
     DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x06);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ENTRY);
     DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x02);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_HOME);
     DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x0C);
+    dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_ON);
     DisplayLoop(1, false);
     
     return;
@@ -183,5 +183,32 @@ void dspDisplayLoop(int count) {
         }
     }
 
+    return;
+}
+
+void DisplayDataSetRow(unsigned char row) 
+{
+    unsigned char rowValue;
+    switch (row) 
+    {
+        case 0:
+            rowValue = 0x00;
+            break;
+        case 1:
+            rowValue = 0x40;
+            break;
+        case 2:
+            rowValue = 0x14;
+            break;
+        case 3:
+            rowValue = 0x54;
+            break;
+        default:
+            rowValue = 0x00;
+            break;
+    }
+    
+    dspDisplayDataAddOne(setPosition, rowValue);
+    
     return;
 }
