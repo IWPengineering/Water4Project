@@ -27,6 +27,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
+    <Elem>.</Elem>
     <Elem></Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>

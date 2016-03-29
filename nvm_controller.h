@@ -35,12 +35,13 @@
 #include <stdint.h>
 #include <libpic30.h>
 
-#define NVM_ENABLED 0
+#define NVM_ENABLED 1
 
 #if NVM_ENABLED == 1
 
 typedef uint16_t nvm_size_t;
 typedef uint16_t nvm_handle_t;
+
 typedef enum 
 {
     NVM_SUCCESS = 0,
