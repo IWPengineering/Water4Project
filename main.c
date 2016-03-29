@@ -298,6 +298,21 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
     DisplayLoop(15, true);
 }
 
+static int countdownPos = 0;
+const unsigned char countdownArray[] = { '5', '5', '4', '4', '3', '3', '2', '2', '1', '1', '0', '0' };
+const unsigned char countdownResetArray[] = "Reset In ";
+static void DisplayCountdown(void)
+{
+    DisplayDataAddString((unsigned char *)countdownResetArray, sizeof(countdownResetArray));
+    DisplayDataAddCharacter(countdownArray[countdownPos++]);
+    DisplayLoop(15, true);
+}
+
+static void ResetDisplayCountdown(void)
+{
+    countdownPos = 0;
+}
+
 #define delayTime                   500
 #define msHr                        (uint32_t)3600000
 #define hourTicks                   msHr / delayTime
@@ -337,16 +352,18 @@ int main(void)
                buttonTicks++; 
                if(buttonTicks > BUTTON_TICK_COUNTDOWN_THRESHOLD)
                {
-                   
+                   DisplayCountdown();
                }
                if(buttonTicks > BUTTON_TICK_RESET_THRESHOLD)
                {
-                   
+                   tickCounter = 0;
+                   hourCounter = 0;
                }
             }
             else
             {
                 isButtonTicking = false;
+                ResetDisplayCountdown();
                 DisplayTurnOff();
             }
             
