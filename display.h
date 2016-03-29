@@ -86,5 +86,6 @@ void DisplayLoop(int count, bool resetCursor);
 void DisplayDataAddString(unsigned char *string, int size);
 void DisplayDataAddCharacter(unsigned char ch);
 void DisplayDataSetRow(unsigned char row);
+void DisplayTurnOff(void);
 #endif	/* DISPLAY_H__ */
 

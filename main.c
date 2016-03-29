@@ -60,6 +60,8 @@
 
 const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
+static bool isButtonTicking = false;
+static volatile int buttonTicks = 0;
 
 void initAdc(void); // forward declaration of init adc
 
@@ -296,9 +298,11 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
     DisplayLoop(15, true);
 }
 
-#define delayTime       500
-#define msHr            (uint32_t)3600000
-#define hourTicks       msHr / delayTime
+#define delayTime                   500
+#define msHr                        (uint32_t)3600000
+#define hourTicks                   msHr / delayTime
+#define BUTTON_TICK_COUNTDOWN_THRESHOLD          10
+#define BUTTON_TICK_RESET_THRESHOLD              20
 
 int main(void)
 {   
@@ -325,6 +329,28 @@ int main(void)
                 tickCounter = 0;
             }
         }
+        
+        if(isButtonTicking)
+        {
+            if(PORTBbits.RB6)
+            {
+               buttonTicks++; 
+               if(buttonTicks > BUTTON_TICK_COUNTDOWN_THRESHOLD)
+               {
+                   
+               }
+               if(buttonTicks > BUTTON_TICK_RESET_THRESHOLD)
+               {
+                   
+               }
+            }
+            else
+            {
+                isButtonTicking = false;
+                DisplayTurnOff();
+            }
+            
+        }
 
         if (buttonFlag) 
         { // If someone pushed the button
@@ -332,9 +358,9 @@ int main(void)
             
             hoursToAsciiDisplay(hourCounter, // hour part
                     (tickCounter / (hourTicks / 1000))); // decimal hour part
-            sleepForPeriod(TEN_SECOND);
             
             // We should clear/turn off display here
+            isButtonTicking = true;
         }
     }
 

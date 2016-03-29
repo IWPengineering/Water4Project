@@ -74,25 +74,7 @@ void dspDisplayInit(void) {
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
     delayMs(1000);
-    /*
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1, false);
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1, false);
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x30);
-    DisplayLoop(1, false);
-    delayMs(100);
-    dspDisplayDataAddOne(sendCommand, 0x38);
-    DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x10);
-    DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x0C);
-    DisplayLoop(1, false);
-    dspDisplayDataAddOne(sendCommand, 0x06);
-    DisplayLoop(1, false);
-     * */
+
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
     DisplayLoop(1, false);
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_OFF);
@@ -211,4 +193,10 @@ void DisplayDataSetRow(unsigned char row)
     dspDisplayDataAddOne(setPosition, rowValue);
     
     return;
+}
+
+void DisplayTurnOff(void)
+{
+    // Reset the cursor, this clears the screen
+    dspDisplaySend(sendCommand, 0x02);
 }
