@@ -308,7 +308,7 @@ int main(void)
     
     // This is the LED port pin
     TRISAbits.TRISA2 = 0;
-    PORTAbits.RA2 = 0;
+    PORTAbits.RA2 = 1;
 
     DisplayInit();
     
@@ -319,6 +319,13 @@ int main(void)
     {
         delayMs(delayTime);
 
+        unsigned char ary[] = "Hello world.";
+        DisplayDataAddString(ary, sizeof("Hello world."));
+        DisplayLoop(10, true);
+        
+        //LATBbits.LATB1 = 
+        //        !LATBbits.LATB1;
+        
         if (readWaterSensor())
         {
             tickCounter++;

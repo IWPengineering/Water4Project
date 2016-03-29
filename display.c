@@ -36,7 +36,8 @@ void DisplayLoop(int count, bool resetCursor) {
     {
         dspDisplaySend(sendCommand, 0x01);
     }
-    for (int inx = 0; inx < count; inx++) {
+    int inx;
+    for (inx = 0; inx < count; inx++) {
         dspDisplayLoop(1);
     }
     return;
@@ -73,6 +74,7 @@ void dspDisplayInit(void) {
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
     delayMs(100);
+    /*
     dspDisplayDataAddOne(sendCommand, 0x30);
     DisplayLoop(1, false);
     delayMs(100);
@@ -89,6 +91,19 @@ void dspDisplayInit(void) {
     dspDisplayDataAddOne(sendCommand, 0x0C);
     DisplayLoop(1, false);
     dspDisplayDataAddOne(sendCommand, 0x06);
+    DisplayLoop(1, false);
+     * */
+    dspDisplayDataAddOne(sendCommand, 0x38);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, 0x80);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, 0x01);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, 0x06);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, 0x02);
+    DisplayLoop(1, false);
+    dspDisplayDataAddOne(sendCommand, 0x0C);
     DisplayLoop(1, false);
     
     return;
@@ -140,7 +155,8 @@ void dspDisplayDataAddOne(enum _DisplayCommand command, unsigned char data) {
 }
 
 void dspDisplayDataAddString(unsigned char *string, int size) {
-    for (unsigned char i = 0; i < size - 1; i++) {
+    unsigned char i;
+    for (i = 0; i < size - 1; i++) {
         dspDisplayDataAddOne(sendData, string[i]);
     }
 
@@ -150,7 +166,8 @@ void dspDisplayDataAddString(unsigned char *string, int size) {
 void dspDisplayLoop(int count) {
     // reading busy flag does not work correctly right now
     // need to check it out
-    for (int i = 0; i < count; i++) {
+    int i;
+    for (i = 0; i < count; i++) {
         //if ( IsDisplayBusy ( ) == 0 )
         {
             if (DisplayDataPositionRead < DisplayDataPositionWrite) {
