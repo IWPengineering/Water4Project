@@ -305,12 +305,6 @@ int main(void)
     resetCheckRemedy();
     
     initialization();
-    
-    // This is the LED port pin
-    //TRISAbits.TRISA2 = 0;
-    //TRISAbits.TRISA1 = 0;
-    //PORTAbits.RA2 = 1;
-    //PORTAbits.RA1 = 1;
 
     DisplayInit();
     
@@ -320,17 +314,6 @@ int main(void)
     while (1) 
     {
         delayMs(delayTime);
-
-        //unsigned char ary[] = "HelloHelloHelloHello";
-        //DisplayDataSetRow(0);
-        //DisplayDataAddString(ary, sizeof("HelloHelloHelloHello"));
-        //DisplayLoop(15, true);
-        
-        //PORTAbits.RA2 = !PORTAbits.RA2;
-        //PORTAbits.RA1 = !PORTAbits.RA1;
-        
-        //LATBbits.LATB1 = 
-        //        !LATBbits.LATB1;
         
         if (readWaterSensor())
         {

@@ -37,42 +37,38 @@
 
 #define DISPLAY_DATA_POSITION_MAX 75
 
-#define DSP0_PORT           LATBbits.LATB14 //pin25
-#define DSP1_PORT           LATBbits.LATB2 //LATAbits.LATA7     // pin 19 is on port a
-#define DSP2_PORT           LATBbits.LATB13 // LATAbits.LATA7 // pin 19 //
+#define DSP0_PORT           LATBbits.LATB14 
+#define DSP1_PORT           LATBbits.LATB2 
+#define DSP2_PORT           LATBbits.LATB13 
 #define DSP3_PORT           LATBbits.LATB3
 #define DSP4_PORT           LATAbits.LATA2
-#define DSP5_PORT           LATBbits.LATB12 // LATAbits.LATA7 //LATBbits.LATB7
+#define DSP5_PORT           LATBbits.LATB12 
 #define DSP6_PORT           LATBbits.LATB9
 #define DSP7_PORT           LATBbits.LATB5
 
-// That may be fine, but i don't think so , for kicks and giggles lets try pin 19?
+#define DSP0_PORT_DIR       TRISBbits.TRISB14 
+#define DSP1_PORT_DIR       TRISBbits.TRISB2 
+#define DSP2_PORT_DIR       TRISBbits.TRISB13 
+#define DSP3_PORT_DIR       TRISBbits.TRISB3 
+#define DSP4_PORT_DIR       TRISAbits.TRISA2 
+#define DSP5_PORT_DIR       TRISBbits.TRISB12 
+#define DSP6_PORT_DIR       TRISBbits.TRISB9 
+#define DSP7_PORT_DIR       TRISBbits.TRISB5 
 
-#define DSP0_PORT_DIR       TRISBbits.TRISB14 //  LATBbits.RB14
-#define DSP1_PORT_DIR       TRISBbits.TRISB2 // TRISAbits.TRISA7 //    LATBbits.RB2
-#define DSP2_PORT_DIR       TRISBbits.TRISB13 // TRISAbits.TRISA7 // pin 19 // TRISBbits.TRISB9 //    LATBbits.RB13
-#define DSP3_PORT_DIR       TRISBbits.TRISB3 //    LATBbits.RB3
-#define DSP4_PORT_DIR       TRISAbits.TRISA2 //    LATBbits.RB12
-#define DSP5_PORT_DIR       TRISBbits.TRISB12 // TRISAbits.TRISA7 //TRISBbits.TRISB7 //   LATBbits.RB4
-#define DSP6_PORT_DIR       TRISBbits.TRISB9 //    LATBbits.RB9
-#define DSP7_PORT_DIR       TRISBbits.TRISB5 //    LATBbits.RB5
-
-#define DISPLAY_COMMAND_FUNCTION_SET    0b00111000  //x34//0b00111001
+#define DISPLAY_COMMAND_FUNCTION_SET    0b00111000  
 #define DISPLAY_COMMAND_OFF             0b00001000
 #define DISPLAY_COMMAND_CLEAR           0b00000001
 #define DISPLAY_COMMAND_ENTRY           0b00000110
 #define DISPLAY_COMMAND_HOME            0b00000010
 #define DISPLAY_COMMAND_ON              0b00001100
 
-/****  DISPLAY SPECIFIC  ******/
-#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  LATBbits.LATB0 // LATAbits.LATA6
+#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  LATBbits.LATB0
 #define DISPLAY_BIT_SELECT_DIR__READ_WRITE LATBbits.LATB15
-#define DISPLAY_BIT_ENABLE__HIGH_LO LATBbits.LATB1 // LATAbits.LATA4
-//#define DISPLAY_BIT_BUSY_FLAG PORTBbits.RB7
+#define DISPLAY_BIT_ENABLE__HIGH_LO LATBbits.LATB1
 
-#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR TRISBbits.TRISB0 // TRISAbits.TRISA6 // LATAbits.LATA6
-#define DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR TRISBbits.TRISB15 // LATAbits.LATA7
-#define DISPLAY_BIT_ENABLE__HIGH_LO_DIR TRISBbits.TRISB1 // TRISAbits.TRISA4 // LATAbits.LATA4
+#define DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR TRISBbits.TRISB0 
+#define DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR TRISBbits.TRISB15 
+#define DISPLAY_BIT_ENABLE__HIGH_LO_DIR TRISBbits.TRISB1 
 
 typedef enum _DisplayCommand {
     sendCommand = 1,
