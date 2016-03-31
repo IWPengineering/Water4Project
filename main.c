@@ -329,6 +329,16 @@ int main(void)
 
     DisplayInit();
     
+    DSP0_PORT = 1;
+    DSP1_PORT = 1;
+    DSP2_PORT = 1;
+    DSP3_PORT = 1;
+    DSP4_PORT = 1;
+    DSP5_PORT = 1;
+    DSP6_PORT = 1;
+    DSP7_PORT = 1;
+ 
+    
     uint16_t tickCounter = 0;
     uint16_t hourCounter = 0;
  

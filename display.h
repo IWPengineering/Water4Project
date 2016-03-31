@@ -41,7 +41,7 @@
 #define DSP1_PORT           LATBbits.LATB2 
 #define DSP2_PORT           LATBbits.LATB13 
 #define DSP3_PORT           LATBbits.LATB3
-#define DSP4_PORT           LATAbits.LATA2
+#define DSP4_PORT           LATBbits.LATB4
 #define DSP5_PORT           LATBbits.LATB12 
 #define DSP6_PORT           LATBbits.LATB9
 #define DSP7_PORT           LATBbits.LATB5
@@ -50,7 +50,7 @@
 #define DSP1_PORT_DIR       TRISBbits.TRISB2 
 #define DSP2_PORT_DIR       TRISBbits.TRISB13 
 #define DSP3_PORT_DIR       TRISBbits.TRISB3 
-#define DSP4_PORT_DIR       TRISAbits.TRISA2 
+#define DSP4_PORT_DIR       TRISBbits.TRISB4
 #define DSP5_PORT_DIR       TRISBbits.TRISB12 
 #define DSP6_PORT_DIR       TRISBbits.TRISB9 
 #define DSP7_PORT_DIR       TRISBbits.TRISB5 
