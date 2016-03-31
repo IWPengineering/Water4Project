@@ -60,6 +60,8 @@
 
 const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
+static bool isButtonTicking = false;
+static volatile int buttonTicks = 0;
 
 void initAdc(void); // forward declaration of init adc
 
@@ -217,7 +219,7 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void)
 void hoursToAsciiDisplay(int hours, int decimalHour) 
 {
     int startLcdView = 0;
-
+    DisplayTurnOff();
     unsigned char aryPtr[] = "H: ";
     DisplayDataAddString(aryPtr, sizeof ("H: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
@@ -296,9 +298,28 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
     DisplayLoop(15, true);
 }
 
-#define delayTime       500
-#define msHr            (uint32_t)3600000
-#define hourTicks       msHr / delayTime
+static int countdownPos = 0;
+const unsigned char countdownArray[] = { '5', '5', '4', '4', '3', '3', '2', '2', '1', '1', '0', '0' };
+const unsigned char countdownResetArray[] = "Reset In ";
+static void DisplayCountdown(void)
+{
+    DisplayTurnOff();
+    DisplayDataAddString((unsigned char *)&countdownResetArray, sizeof(countdownResetArray));    
+    DisplayDataAddCharacter(countdownArray[countdownPos++]);
+    DisplayLoop(15, true);
+}
+
+static void ResetDisplayCountdown(void)
+{
+    countdownPos = 0;
+    buttonTicks = 0;
+}
+
+#define delayTime                   500
+#define msHr                        (uint32_t)3600000
+#define hourTicks                   msHr / delayTime
+#define BUTTON_TICK_COUNTDOWN_THRESHOLD          10
+#define BUTTON_TICK_RESET_THRESHOLD              20
 
 int main(void)
 {   
@@ -313,8 +334,9 @@ int main(void)
  
     while (1) 
     {
-        delayMs(delayTime);
-        
+        sleepForPeriod(HALF_SECOND);
+        //delayMs(delayTime);
+
         if (readWaterSensor())
         {
             tickCounter++;
@@ -325,6 +347,35 @@ int main(void)
                 tickCounter = 0;
             }
         }
+        
+        if(isButtonTicking)
+        {
+            if(PORTBbits.RB6)
+            {
+               buttonTicks++; 
+               if(buttonTicks > BUTTON_TICK_COUNTDOWN_THRESHOLD)
+               {
+                   DisplayCountdown();
+               }
+               if(buttonTicks > BUTTON_TICK_RESET_THRESHOLD)
+               {
+                   tickCounter = 0;
+                   hourCounter = 0;
+                   isButtonTicking = false;
+                   ResetDisplayCountdown();
+                   DisplayTurnOff();
+               }
+            }
+            else
+            {
+                
+                isButtonTicking = false;
+                ResetDisplayCountdown();
+                DisplayTurnOff();
+                DisplayLoop(1, true);
+            }
+            
+        }
 
         if (buttonFlag) 
         { // If someone pushed the button
@@ -332,9 +383,9 @@ int main(void)
             
             hoursToAsciiDisplay(hourCounter, // hour part
                     (tickCounter / (hourTicks / 1000))); // decimal hour part
-            delayMs(500);
             
             // We should clear/turn off display here
+            isButtonTicking = true;
         }
     }
 
