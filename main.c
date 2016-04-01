@@ -326,77 +326,7 @@ int main(void)
     resetCheckRemedy();
     
     initialization();
-    DSP0_PORT_DIR = 0b0;
-    DSP1_PORT_DIR = 0b0;
-    DSP2_PORT_DIR = 0b0;
-    DSP3_PORT_DIR = 0b0;
-    DSP4_PORT_DIR = 0b0;
-    DSP5_PORT_DIR = 0b0;
-    DSP6_PORT_DIR = 0b0;
-    DSP7_PORT_DIR = 0b0;
-    
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA_DIR = 0 ;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE_DIR = 0 ;
-    DISPLAY_BIT_ENABLE__HIGH_LO_DIR = 0;
- 
-    DSP0_PORT = 1;
-    DSP1_PORT = 1;
-    DSP2_PORT = 1;
-    DSP3_PORT = 1;
-    DSP4_PORT = 1;
-    DSP5_PORT = 1;
-    DSP6_PORT = 1;
-    DSP7_PORT = 1;
-     
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  = 1;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 1;
-    DISPLAY_BIT_ENABLE__HIGH_LO = 1;
-    
-    delayMs(500);
-    
-    DSP0_PORT = 0;
-    DSP1_PORT = 0;
-    DSP2_PORT = 0;
-    DSP3_PORT = 0;
-    DSP4_PORT = 0;
-    DSP5_PORT = 0;
-    DSP6_PORT = 0;
-    DSP7_PORT = 0;
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  = 0;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0;
-    DISPLAY_BIT_ENABLE__HIGH_LO = 0;
-    
-        delayMs(500);
-
-    
-    DSP0_PORT = 1;
-    DSP1_PORT = 1;
-    DSP2_PORT = 1;
-    DSP3_PORT = 1;
-    DSP4_PORT = 1;
-    DSP5_PORT = 1;
-    DSP6_PORT = 1;
-    DSP7_PORT = 1;
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA = 1;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 1;
-    DISPLAY_BIT_ENABLE__HIGH_LO = 1;
-    
-    delayMs(500);
-    
-    DSP0_PORT = 0;
-    DSP1_PORT = 0;
-    DSP2_PORT = 0;
-    DSP3_PORT = 0;
-    DSP4_PORT = 0;
-    DSP5_PORT = 0;
-    DSP6_PORT = 0;
-    DSP7_PORT = 0;
-    DISPLAY_BIT_REGISTER_SELECT__COMMAND_DATA  = 0;
-    DISPLAY_BIT_SELECT_DIR__READ_WRITE = 0;
-    DISPLAY_BIT_ENABLE__HIGH_LO = 0;
-    
-    delayMs(1);
-    
+       
     DisplayInit();
     
     
