@@ -334,8 +334,8 @@ int main(void)
  
     while (1) 
     {
-        sleepForPeriod(HALF_SECOND);
-        //delayMs(delayTime);
+        //sleepForPeriod(HALF_SECOND);
+        delayMs(delayTime);
 
         if (readWaterSensor())
         {
@@ -374,7 +374,6 @@ int main(void)
                 DisplayTurnOff();
                 DisplayLoop(1, true);
             }
-            
         }
 
         if (buttonFlag) 

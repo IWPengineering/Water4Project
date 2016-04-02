@@ -8,3 +8,4 @@ nbproject/private/private.xml
 build/default/debug/main.o.d
 dist/default/debug/Water4Project.debug.map
 # nbproject
+*.d
