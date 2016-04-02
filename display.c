@@ -73,7 +73,7 @@ void dspDisplayInit(void) {
     DSP5_PORT_DIR = 0b0;
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
-    delayMs(1000);
+    delayMs(100);
 
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
     DisplayLoop(1, false);
