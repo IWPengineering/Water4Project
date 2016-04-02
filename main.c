@@ -216,6 +216,14 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void)
     IFS1bits.CNIF = 0;
 }
 
+static void adjustHours(float hours, int *p_hours, int *p_decimal_hours)
+{
+    hours *= 1.602564;
+    
+    *p_hours = ((int)hours);
+    *p_decimal_hours = (hours * 1000) - (*p_hours * 1000);
+}
+
 void hoursToAsciiDisplay(int hours, int decimalHour) 
 {
     int startLcdView = 0;
@@ -224,6 +232,15 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
     DisplayDataAddString(aryPtr, sizeof ("H: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
 
+    float realHours = (hours * 1000) + decimalHour;
+    realHours /= 1000;
+    
+    int h, dh;
+    adjustHours(realHours, &h, &dh);
+    
+    hours = h;
+    decimalHour = dh;
+    
     if (hours == 0) 
     {
         DisplayDataAddCharacter(48);
@@ -317,9 +334,9 @@ static void ResetDisplayCountdown(void)
 
 #define delayTime                   500
 #define msHr                        (uint32_t)3600000
-#define hourTicks                   msHr / delayTime
-#define BUTTON_TICK_COUNTDOWN_THRESHOLD          10
-#define BUTTON_TICK_RESET_THRESHOLD              20
+#define hourTicks                   (msHr / delayTime)
+#define BUTTON_TICK_COUNTDOWN_THRESHOLD          5
+#define BUTTON_TICK_RESET_THRESHOLD              10
 
 int main(void)
 {   

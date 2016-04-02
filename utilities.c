@@ -77,7 +77,18 @@ void initSleep(void)
 void sleepForPeriod(sleepLength_t length)
 {
     //PMD3bits.RTCCMD = 0;
-    _RTCWREN = 1;
+    asm volatile ("push w7");
+    asm volatile ("push w8");
+    asm volatile ("disi #5");
+    asm volatile ("mov #0x55, w7");
+    asm volatile ("mov w7, _NVMKEY");
+    asm volatile ("mov #0xAA, w8");
+    asm volatile ("mov w8, _NVMKEY");
+    asm volatile ("bset _RCFGCAL, #13"); //set the RTCWREN bit
+    asm volatile ("pop w8");
+    asm volatile ("pop w7");
+    
+    _RTCEN = 1;
     ALCFGRPTbits.AMASK = length;    // shouldn't it be configured to half a second> 0000
     
     ALCFGRPTbits.ALRMPTR = 0b0010;
@@ -91,6 +102,23 @@ void sleepForPeriod(sleepLength_t length)
     // Go to sleep
     Sleep();
     asm volatile("NOP");
+    
+    asm volatile ("push w7");
+    asm volatile ("push w8");
+    asm volatile ("disi #5");
+    asm volatile ("mov #0x55, w7");
+    asm volatile ("mov w7, _NVMKEY");
+    asm volatile ("mov #0xAA, w8");
+    asm volatile ("mov w8, _NVMKEY");
+    asm volatile ("bset _RCFGCAL, #13"); //set the RTCWREN bit
+    asm volatile ("pop w8");
+    asm volatile ("pop w7");
+    
+    _RTCEN = 0;
+    _RTCPTR = 0b00; // get ready to set seconds/minutes
+    RTCVAL = 0x0000; // set minutes and secs back to 0.
+    
+    _RTCWREN = 0;
 }
 
 void resetCheckRemedy(void)
