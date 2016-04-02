@@ -312,7 +312,6 @@ static void DisplayCountdown(void)
 static void ResetDisplayCountdown(void)
 {
     countdownPos = 0;
-    buttonTicks = 0;
 }
 
 #define delayTime                   500
