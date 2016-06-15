@@ -62,7 +62,8 @@
 #define PULSE_WIDTH_WATER_PRESENT_THRESHOLD         20
 
 #define WPS_CONTROL_PIN                             PORTAbits.RA0
-#define WPS_SENSOR_PIN                              PORTBbits.RB8                                  
+#define WPS_SENSOR_PIN                              PORTBbits.RB8
+#define WPS_TIMER                                   TIMER_1
 
 #define WPS_CONTROL_DIR                             TRISAbits.TRISA0
 #define WPS_SENSOR_DIR                              TRISBbits.TRISB8
@@ -71,9 +72,9 @@
 #define BUTTON_DIR                                  TRISBbits.TRISB6
 #define BUTTON_CN_INTERRUPT                         CNEN2bits.CN24IE
                           
-static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
-static bool isButtonTicking = false;
-static volatile int buttonTicks = 0;
+static volatile int button_pressed_flag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
+static bool is_button_ticking = false;
+static volatile int button_ticks = 0;
 
 void initAdc(void); // forward declaration of init adc
 
@@ -108,15 +109,15 @@ void initialization(void) {
         .prescaler = TIMER_PRESCALER_256,
         .source = INTERNAL_CLOCK,
         .stop_in_idle_mode = true,
-        .timer_instance = TIMER_1
+        .timer_instance = WPS_TIMER
     };
     timer_init(&wps_timer_init);
-    timer_start(TIMER_1);
+    timer_start(WPS_TIMER);
     
     /* Initialize Button */
     BUTTON_DIR = DIRECTION_INPUT;
     BUTTON_CN_INTERRUPT = 1;
-    IEC1bits.CNIE = 1;
+    IEC1bits.CNIE = 1; // Enable CN interrupts
 
     initAdc();
 }
@@ -129,10 +130,11 @@ void initialization(void) {
  * Note: Pic Dependent
  * TestDate: Not tested as of 03-05-2015
  ********************************************************************/
-int readWaterSensor(void) // RB5 is one water sensor
+bool is_water_present(void) // RB5 is one water sensor
 {
     WPS_CONTROL_PIN = 1;
-    uint16_t prev_time, cur_time, pulse_width = 0;
+    timer_start(WPS_TIMER);
+    uint16_t prev_time, cur_time, pulse_width;
     if (WPS_SENSOR_PIN) 
     {
         while (WPS_SENSOR_PIN) 
@@ -148,10 +150,12 @@ int readWaterSensor(void) // RB5 is one water sensor
     while (WPS_SENSOR_PIN) 
     {
     };
+
+    cur_time = timer_get_16bit(TIMER_1); //get time at end of positive pulse
     
     WPS_CONTROL_PIN = 0;
+    timer_stop(WPS_TIMER);
     
-    cur_time = timer_get_16bit(TIMER_1); //get time at end of positive pulse
     if (cur_time >= prev_time) 
     {
         pulse_width = (cur_time - prev_time);
@@ -237,14 +241,14 @@ void __attribute__((interrupt, auto_psv)) _CNInterrupt(void)
 {
     if (IFS1bits.CNIF && PORTBbits.RB6) 
     { // If the button is pushed and we're in the right ISR
-        buttonFlag = 1;
+        button_pressed_flag = 1;
     }
 
     // Always reset the interrupt flag
     IFS1bits.CNIF = 0;
 }
 
-static void adjustHours(float hours, int *p_hours, int *p_decimal_hours)
+static void adjust_hours(float hours, int *p_hours, int *p_decimal_hours)
 {
     hours *= 1.602564;
     
@@ -252,22 +256,20 @@ static void adjustHours(float hours, int *p_hours, int *p_decimal_hours)
     *p_decimal_hours = (hours * 1000) - (*p_hours * 1000);
 }
 
-void hoursToAsciiDisplay(int hours, int decimalHour) 
+void hours_to_ascii_display(int hours, int dec_hour) 
 {
-    int startLcdView = 0;
+    bool start_lcd_view = false;
     DisplayTurnOff();
     unsigned char aryPtr[] = "H: ";
     DisplayDataAddString(aryPtr, sizeof ("H: "));
     //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
 
-    float realHours = (hours * 1000) + decimalHour;
-    realHours /= 1000;
-    
-    int h, dh;
-    adjustHours(realHours, &h, &dh);
-    
-    hours = h;
-    decimalHour = dh;
+    float real_hours = (hours * 1000) + dec_hour;
+    real_hours /= 1000; // Three decimal places
+
+    // Kludge hours by a multiplier to achieve accuracy.
+    //  This is due to inaccurate sleep timing (ie. not 500ms)
+    adjust_hours(real_hours, &hours, &dec_hour);
     
     if (hours == 0) 
     {
@@ -275,69 +277,69 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
     } 
     else 
     {
-        if (startLcdView || (hours / 10000 != 0)) 
+        if (start_lcd_view || (hours / 10000 != 0)) 
         {
             DisplayDataAddCharacter(hours / 10000 + 48);
-            startLcdView = 1;
-            hours = hours - ((hours / 10000) * 10000); // moving the decimal point - taking advantage of int rounding
+            start_lcd_view = true;
+            hours %= 10000;
         }
         
-        if (startLcdView || hours / 1000 != 0) 
+        if (start_lcd_view || hours / 1000 != 0) 
         {
             DisplayDataAddCharacter(hours / 1000 + 48);
-            startLcdView = 1;
-            hours = hours - ((hours / 1000) * 1000);
+            start_lcd_view = true;
+            hours %= 1000;
         }
         
-        if (startLcdView || hours / 100 != 0) 
+        if (start_lcd_view || hours / 100 != 0) 
         {
             DisplayDataAddCharacter(hours / 100 + 48);
-            startLcdView = 1;
-            hours = hours - ((hours / 100) * 100);
+            start_lcd_view = true;
+            hours %= 100;
         }
         
-        if (startLcdView || hours / 10 != 0) 
+        if (start_lcd_view || hours / 10 != 0) 
         {
             DisplayDataAddCharacter(hours / 10 + 48);
-            startLcdView = 1;
-            hours = hours - ((hours / 10) * 10);
+            start_lcd_view = true;
+            hours %= 10;
         }
         
         DisplayDataAddCharacter(hours + 48);
     }
     
     DisplayDataAddCharacter('.');
-    startLcdView = 0;
+    start_lcd_view = false;
     
-    if (decimalHour == 0) 
+    if (dec_hour == 0) 
     {
         DisplayDataAddCharacter(48);
     } 
     else 
     {   
-        if (startLcdView || decimalHour / 100 != 0) 
+        if (start_lcd_view || dec_hour / 100 != 0) 
         {
-            DisplayDataAddCharacter(decimalHour / 100 + 48);
-            startLcdView = 1;
-            decimalHour = decimalHour - ((decimalHour / 100) * 100);
+            DisplayDataAddCharacter(dec_hour / 100 + 48);
+            start_lcd_view = true;
+            dec_hour %= 100;
         }
         else
         {
             DisplayDataAddCharacter(48);
         }
         
-        if (startLcdView || decimalHour / 10 != 0) 
+        if (start_lcd_view || dec_hour / 10 != 0) 
         {
-            DisplayDataAddCharacter(decimalHour / 10 + 48);
-            startLcdView = 1;
-            decimalHour = decimalHour - ((decimalHour / 10) * 10);
+            DisplayDataAddCharacter(dec_hour / 10 + 48);
+            start_lcd_view = true;
+            dec_hour %= 10;
         }
         else
         {
             DisplayDataAddCharacter(48);
         }
         
-        DisplayDataAddCharacter(decimalHour + 48);
+        DisplayDataAddCharacter(dec_hour + 48);
     }
 
     DisplayLoop(15, true);
@@ -346,6 +348,7 @@ void hoursToAsciiDisplay(int hours, int decimalHour)
 static int countdownPos = 0;
 const unsigned char countdownArray[] = { '5', '5', '4', '4', '3', '3', '2', '2', '1', '1', '0', '0' };
 const unsigned char countdownResetArray[] = "Reset In ";
+
 static void DisplayCountdown(void)
 {
     DisplayTurnOff();
@@ -357,12 +360,12 @@ static void DisplayCountdown(void)
 static void ResetDisplayCountdown(void)
 {
     countdownPos = 0;
-    buttonTicks = 0;
+    button_ticks = 0;
 }
 
-#define delayTime                   500
-#define msHr                        (uint32_t)3600000
-#define hourTicks                   (msHr / delayTime)
+#define DELAY_TIME                   500
+#define MS_PER_HOUR                  (uint32_t)3600000
+#define HOUR_TICKS                   (MS_PER_HOUR / DELAY_TIME)
 #define BUTTON_TICK_COUNTDOWN_THRESHOLD          5
 #define BUTTON_TICK_RESET_THRESHOLD              10
 
@@ -376,39 +379,39 @@ int main(void)
     
     init_sleep();
     
-    uint16_t tickCounter = 0;
-    uint16_t hourCounter = 0;
+    uint16_t tick_counter = 0;
+    uint16_t hour_counter = 0;
  
     while (1) 
     {
         sleep_for_period(HALF_SECOND);
         //delayMs(delayTime);
 
-        if (readWaterSensor())
+        if (is_water_present())
         {
-            tickCounter++;
+            tick_counter++;
 
-            if (tickCounter >= hourTicks) 
+            if (tick_counter >= HOUR_TICKS) 
             {
-                hourCounter++;
-                tickCounter = 0;
+                hour_counter++;
+                tick_counter = 0;
             }
         }
         
-        if(isButtonTicking)
+        if(is_button_ticking)
         {
             if(PORTBbits.RB6)
             {
-               buttonTicks++; 
-               if(buttonTicks > BUTTON_TICK_COUNTDOWN_THRESHOLD)
+               button_ticks++; 
+               if(button_ticks > BUTTON_TICK_COUNTDOWN_THRESHOLD)
                {
                    DisplayCountdown();
                }
-               if(buttonTicks > BUTTON_TICK_RESET_THRESHOLD)
+               if(button_ticks > BUTTON_TICK_RESET_THRESHOLD)
                {
-                   tickCounter = 0;
-                   hourCounter = 0;
-                   isButtonTicking = false;
+                   tick_counter = 0;
+                   hour_counter = 0;
+                   is_button_ticking = false;
                    ResetDisplayCountdown();
                    DisplayTurnOff();
                }
@@ -416,22 +419,22 @@ int main(void)
             else
             {
                 
-                isButtonTicking = false;
+                is_button_ticking = false;
                 ResetDisplayCountdown();
                 DisplayTurnOff();
                 DisplayLoop(1, true);
             }
         }
 
-        if (buttonFlag) 
+        if (button_pressed_flag) 
         { // If someone pushed the button
-            buttonFlag = 0;
+            button_pressed_flag = 0;
             
-            hoursToAsciiDisplay(hourCounter, // hour part
-                    (tickCounter / (hourTicks / 1000))); // decimal hour part
+            hours_to_ascii_display(hour_counter, // hour part
+                    (tick_counter / (HOUR_TICKS / 1000))); // decimal hour part
             
             // We should clear/turn off display here
-            isButtonTicking = true;
+            is_button_ticking = true;
         }
     }
 
