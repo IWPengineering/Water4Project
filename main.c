@@ -76,7 +76,7 @@ static volatile int button_pressed_flag = 0; // alerts us that the button has be
 static bool is_button_ticking = false;
 static volatile int button_ticks = 0;
 
-void initAdc(void); // forward declaration of init adc
+void initAdc(void);
 
 /*********************************************************************
  * Function: initialization()
@@ -86,7 +86,8 @@ void initAdc(void); // forward declaration of init adc
  * Note: Pic Dependent
  * TestDate: 06-03-14
  ********************************************************************/
-void initialization(void) {
+void peripheral_init(void) 
+{
     /* Initialize all IO ports to Standard State */
     ANSA = 0;
     ANSB = 0;
@@ -221,6 +222,8 @@ int readAdc(int channel) //check with accelerometer
             TRISBbits.TRISB2 = 1; // AN4 is an input
             AD1CHSbits.CH0SA = 4; // Connect AN4 as the S/H input
             break;
+        default:
+            return 0; // We aren't handling non-channel 4 inputs
     }
     AD1CON1bits.ADON = 1; // Turn on ADC
     AD1CON1bits.SAMP = 1;
@@ -239,7 +242,7 @@ void __attribute__((__interrupt__, __auto_psv__)) _DefaultInterrupt()
 
 void __attribute__((interrupt, auto_psv)) _CNInterrupt(void) 
 {
-    if (IFS1bits.CNIF && PORTBbits.RB6) 
+    if (IFS1bits.CNIF && BUTTON_PIN) 
     { // If the button is pushed and we're in the right ISR
         button_pressed_flag = 1;
     }
@@ -262,7 +265,6 @@ void hours_to_ascii_display(int hours, int dec_hour)
     DisplayTurnOff();
     unsigned char aryPtr[] = "H: ";
     DisplayDataAddString(aryPtr, sizeof ("H: "));
-    //    DisplayDataAddCharacter(49); // can we cycle power, or ones mixed up.
 
     float real_hours = (hours * 1000) + dec_hour;
     real_hours /= 1000; // Three decimal places
@@ -373,7 +375,7 @@ int main(void)
 {   
     reset_check();
     
-    initialization();
+    peripheral_init();
 
     DisplayInit();
     
