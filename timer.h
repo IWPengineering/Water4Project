@@ -35,6 +35,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define USING_TIMER_1       1
+#define USING_TIMER_2       0
+#define USING_TIMER_3       0
+#define USING_TIMER_4       0
+#define USING_TIMER_5       0
+
 typedef enum 
 {
     TIMER_1 = 1,
