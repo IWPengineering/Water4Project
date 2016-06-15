@@ -144,7 +144,7 @@ int readWaterSensor(void) // RB5 is one water sensor
     {
     }; //wait for rising edge
     
-    uint16_t prev_time = timer_get_16bit(TIMER_1); //get time at start of positive pulse
+    prev_time = timer_get_16bit(TIMER_1); //get time at start of positive pulse
     while (WPS_SENSOR_PIN) 
     {
     };
