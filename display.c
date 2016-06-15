@@ -73,7 +73,7 @@ void dspDisplayInit(void) {
     DSP5_PORT_DIR = 0b0;
     DSP6_PORT_DIR = 0b0;
     DSP7_PORT_DIR = 0b0;
-    delayMs(100);
+    delay_ms(100);
 
     dspDisplayDataAddOne(sendCommand, DISPLAY_COMMAND_FUNCTION_SET);
     DisplayLoop(1, false);
@@ -199,6 +199,6 @@ void DisplayTurnOff(void)
 {
     // Reset the cursor, this clears the screen
     dspDisplaySend(sendCommand, 0x01);
-    delayMs(5);
+    delay_ms(5);
     dspDisplaySend(sendCommand, 0x02);
 }

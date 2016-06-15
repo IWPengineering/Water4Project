@@ -13,10 +13,8 @@
 #include <string.h>
 #include "display.h"
 #include "utilities.h"
-
-
-
-
+#include "rtcc.h"
+#include "timer.h"
 
 // ****************************************************************************
 // *** PIC24F32KA302 Configuration Bit Settings *******************************
@@ -58,7 +56,21 @@
 #pragma config DSBOREN = ON // Deep Sleep Zero-Power BOR Enable bit (Deep Sleep BOR enabled in Deep Sleep)
 #pragma config DSWDTEN = ON // Deep Sleep Watchdog Timer Enable bit (DSWDT enabled)
 
-const int pulseWidthThreshold = 20; // The value to check the pulse width against (2048)
+#define DIRECTION_INPUT                             1
+#define DIRECTION_OUTPUT                            0
+
+#define PULSE_WIDTH_WATER_PRESENT_THRESHOLD         20
+
+#define WPS_CONTROL_PIN                             PORTAbits.RA0
+#define WPS_SENSOR_PIN                              PORTBbits.RB8                                  
+
+#define WPS_CONTROL_DIR                             TRISAbits.TRISA0
+#define WPS_SENSOR_DIR                              TRISBbits.TRISB8
+
+#define BUTTON_PIN                                  PORTBbits.RB6
+#define BUTTON_DIR                                  TRISBbits.TRISB6
+#define BUTTON_CN_INTERRUPT                         CNEN2bits.CN24IE
+                          
 static volatile int buttonFlag = 0; // alerts us that the button has been pushed and entered the inerrupt subroutine
 static bool isButtonTicking = false;
 static volatile int buttonTicks = 0;
@@ -74,24 +86,37 @@ void initAdc(void); // forward declaration of init adc
  * TestDate: 06-03-14
  ********************************************************************/
 void initialization(void) {
-    //IO port control
-    ANSA = 0; // Make PORTA digital I/O
-    TRISA = 0xFFFF; // Make PORTA all inputs
-    ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
-    TRISB = 0x0DC0; //0xCEE0; // Set LCD outputs as outputs
+    /* Initialize all IO ports to Standard State */
+    ANSA = 0;
+    ANSB = 0;
+    TRISA = 0xFFFF;
+    TRISB = 0xFFFF;
+    
+    /* Initialize LCD Pins */
+    TRISB &= 0x0DC0; // This should be done more elegantly
+    // I don't know what this pin is - 
+    //  Will refactor when I get schematic
     TRISBbits.TRISB4 = 1;
-    // Timer control (for WPS)
-    T1CONbits.TCS = 0; // Source is Internal Clock (8MHz)
-    T1CONbits.TCKPS = 0b11; // Prescalar to 1:256
-    T1CONbits.TON = 1; // Enable the timer (timer 1 is used for the water sensor)
-
-    //H2O sensor config
-    // WPS_ON/OFF pin 2
-    TRISAbits.TRISA0 = 0; //makes water presence sensor pin an output.
-    PORTAbits.RA0 = 1; //turns on the water presence sensor.
-
-    CNEN2bits.CN24IE = 1; // enable interrupt for pin 15
-    IEC1bits.CNIE = 1; // enable change notification interrupt
+    
+    /* Initialize WPS */
+    WPS_SENSOR_DIR = DIRECTION_INPUT;
+    WPS_CONTROL_DIR = DIRECTION_OUTPUT;
+    WPS_CONTROL_PIN = 0;
+    
+    timer_init_t wps_timer_init =
+    { 
+        .prescaler = TIMER_PRESCALER_256,
+        .source = INTERNAL_CLOCK,
+        .stop_in_idle_mode = true,
+        .timer_instance = TIMER_1
+    };
+    timer_init(&wps_timer_init);
+    timer_start(TIMER_1);
+    
+    /* Initialize Button */
+    BUTTON_DIR = DIRECTION_INPUT;
+    BUTTON_CN_INTERRUPT = 1;
+    IEC1bits.CNIE = 1;
 
     initAdc();
 }
@@ -106,34 +131,37 @@ void initialization(void) {
  ********************************************************************/
 int readWaterSensor(void) // RB5 is one water sensor
 {
-    // WPS_OUT - pin14
-    if (PORTBbits.RB8) 
+    WPS_CONTROL_PIN = 1;
+    uint16_t prev_time, cur_time, pulse_width = 0;
+    if (WPS_SENSOR_PIN) 
     {
-        while (PORTBbits.RB8) 
+        while (WPS_SENSOR_PIN) 
         {
         }; //make sure you start at the beginning of the positive pulse
     }
     
-    while (!PORTBbits.RB8) 
+    while (!WPS_SENSOR_PIN) 
     {
     }; //wait for rising edge
     
-    uint32_t prevICTime = TMR1; //get time at start of positive pulse
-    while (PORTBbits.RB8) 
+    uint16_t prev_time = timer_get_16bit(TIMER_1); //get time at start of positive pulse
+    while (WPS_SENSOR_PIN) 
     {
     };
-    uint32_t currentICTime = TMR1; //get time at end of positive pulse
-    uint32_t pulseWidth = 0;
-    if (currentICTime >= prevICTime) 
+    
+    WPS_CONTROL_PIN = 0;
+    
+    cur_time = timer_get_16bit(TIMER_1); //get time at end of positive pulse
+    if (cur_time >= prev_time) 
     {
-        pulseWidth = (currentICTime - prevICTime);
+        pulse_width = (cur_time - prev_time);
     } 
     else 
     {
-        pulseWidth = (currentICTime - prevICTime + 0x100000000);
+        pulse_width = (0xFFFF - prev_time) + cur_time;
     }
     //Check if this value is right
-    return (pulseWidth <= pulseWidthThreshold);
+    return (pulse_width <= PULSE_WIDTH_WATER_PRESENT_THRESHOLD);
 }
 
 /*********************************************************************
@@ -340,20 +368,20 @@ static void ResetDisplayCountdown(void)
 
 int main(void)
 {   
-    resetCheckRemedy();
+    reset_check();
     
     initialization();
 
     DisplayInit();
     
-    initSleep();
+    init_sleep();
     
     uint16_t tickCounter = 0;
     uint16_t hourCounter = 0;
  
     while (1) 
     {
-        sleepForPeriod(HALF_SECOND);
+        sleep_for_period(HALF_SECOND);
         //delayMs(delayTime);
 
         if (readWaterSensor())

@@ -31,42 +31,10 @@
 #ifndef UTILITIES_H__
 #define	UTILITIES_H__
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h> // include processor files - each processor file is guarded.
+#include <stdint.h>
 
-void delayMs(int ms);
-
-typedef enum 
-{
-            HALF_SECOND = 0b0000,
-            ONE_SECOND  = 0b0001,
-            TEN_SECOND  = 0b0010,
-            ONE_MINUTE  = 0b0011,
-            TEN_MINUTE  = 0b0100,
-            ONE_HOUR    = 0b0101,
-            ONE_DAY     = 0b0110,
-            ONE_WEEK    = 0b0111,
-            ONE_MONTH   = 0b1000,
-            ONE_YEAR    = 0b1001
-} sleepLength_t;
-/**
- * void initSleep(void)
- * 
- * This function call inits the sleep mode for the PIC.
- * This will be used in future sleepMs calls
- * 
- * This function uses the RTCC.
- */
-void initSleep(void);
-
-/**
- * void sleepms(sleepLength_t length)
- * 
- * @param length - enum which represents length of sleep
- * 
- * This function puts the device to sleep for the specified period.
- * This function uses the RTCC Alarm
- */
-void sleepForPeriod(sleepLength_t length);
+void delay_ms(int ms);
 
 /**
  * This function checks every possible reset condition, individually.
@@ -76,7 +44,7 @@ void sleepForPeriod(sleepLength_t length);
  * As of 3/24, this function just clears the reset bits, it doesn't handle
  *  any specific implementation. This should be fixed later.
  */
-void resetCheckRemedy(void);
+void reset_check(void);
 
 
 #endif	/* UTILITIES_H__ */
